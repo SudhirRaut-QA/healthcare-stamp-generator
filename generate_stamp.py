@@ -22,30 +22,36 @@ def main():
     # Create generator
     generator = HospitalStampGenerator()
     
-    # Generate output filename if not provided
-    if args.output is None:
-        safe_name = "".join(c for c in args.hospital_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
-        safe_name = safe_name.replace(' ', '_')
-        args.output = f"{safe_name}_stamp.png"
-    
     try:
-        # Generate and save stamp
-        print(f"Generating stamp for: {args.hospital_name}")
-        print(f"Size: {args.size}x{args.size} pixels")
-        print(f"Output file: {args.output}")
+        # Generate output filename if not provided
+        if args.output is None:
+            # Use the enhanced save method that saves to output folder
+            output_path = generator.save_stamp_to_output(
+                hospital_name=args.hospital_name,
+                size=args.size
+            )
+            print(f"✅ Stamp generated successfully: {output_path}")
+        else:
+            # Use custom filename in output folder
+            output_path = os.path.join("stampOutput", args.output)
+            # Generate and save stamp
+            print(f"Generating stamp for: {args.hospital_name}")
+            print(f"Size: {args.size}x{args.size} pixels")
+            print(f"Output file: {output_path}")
+            
+            generator.save_stamp(
+                hospital_name=args.hospital_name,
+                filename=output_path,
+                size=args.size
+            )
+            print(f"✅ Stamp generated successfully: {output_path}")
         
-        generator.save_stamp(
-            hospital_name=args.hospital_name,
-            filename=args.output,
-            size=args.size
-        )
-        
-        print(f"✅ Stamp generated successfully: {args.output}")
         print("Features:")
-        print("  - Circular design with blue ink")
+        print("  - Circular design with customizable colors")
         print("  - Transparent background")
         print("  - Professional medical appearance")
-        print("  - Ready for prescription printing")
+        print("  - Multiple style options")
+        print("  - Saved to stampOutput folder")
         
     except Exception as e:
         print(f"❌ Error generating stamp: {e}")
@@ -63,10 +69,14 @@ if __name__ == "__main__":
         print("  python generate_stamp.py 'Medical Center' --size 400")
         print("  python generate_stamp.py 'Hospital Name' --output my_stamp.png")
         print()
-        print("Generating example stamp...")
+        print("Generating example stamps...")
         
         generator = HospitalStampGenerator()
-        generator.save_stamp("EXAMPLE MEDICAL CENTER", "example_stamp.png")
-        print("✅ Example stamp saved as: example_stamp.png")
+        # Create multiple example stamps with different styles
+        variants = generator.create_stamp_variants("EXAMPLE MEDICAL CENTER")
+        
+        print("✅ Example stamps created:")
+        for style, path in variants.items():
+            print(f"   - {style.title()}: {path}")
     else:
         main()

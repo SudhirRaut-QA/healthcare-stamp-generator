@@ -1,5 +1,5 @@
 """Stamp generator module initialization"""
 
-from .generator import HospitalStampGenerator
+from .generator import HospitalStampGenerator, StampStyle, StampColor
 
-__all__ = ['HospitalStampGenerator']
+__all__ = ['HospitalStampGenerator', 'StampStyle', 'StampColor']

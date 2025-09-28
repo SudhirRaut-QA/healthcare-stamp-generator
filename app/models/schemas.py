@@ -28,6 +28,42 @@ class StampGenerationRequest(BaseModel):
     )
 
 
+class EnhancedStampRequest(BaseModel):
+    """Request model for enhanced stamp generation"""
+    hospital_name: str = Field(
+        ..., 
+        description="Name of the hospital for the stamp",
+        min_length=1,
+        max_length=50
+    )
+    size: Optional[int] = Field(
+        350, 
+        description="Size of the stamp in pixels (diameter)",
+        ge=100,
+        le=800
+    )
+    style: Optional[str] = Field(
+        "classic",
+        description="Stamp style: classic, modern, official, emergency"
+    )
+    color: Optional[str] = Field(
+        "blue",
+        description="Stamp color: blue, red, green, black, navy, maroon"
+    )
+    include_date: Optional[bool] = Field(
+        False,
+        description="Include current date in the stamp"
+    )
+    include_logo: Optional[bool] = Field(
+        True,
+        description="Include medical symbol in the stamp"
+    )
+    border_style: Optional[str] = Field(
+        "double",
+        description="Border style: single, double, triple"
+    )
+
+
 class StampGenerationResponse(BaseModel):
     """Response model for stamp generation"""
     message: str = Field(description="Success message")

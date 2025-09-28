@@ -2,6 +2,7 @@
 
 from .schemas import (
     StampGenerationRequest,
+    EnhancedStampRequest,
     StampGenerationResponse,
     HealthResponse,
     ErrorResponse
@@ -9,6 +10,7 @@ from .schemas import (
 
 __all__ = [
     'StampGenerationRequest',
+    'EnhancedStampRequest',
     'StampGenerationResponse', 
     'HealthResponse',
     'ErrorResponse'
