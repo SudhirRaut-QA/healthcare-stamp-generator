@@ -47,6 +47,87 @@ class HospitalStampGenerator:
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
     
+    def _calculate_dynamic_parameters(self, hospital_name: str, size: int) -> Dict[str, Any]:
+        """Calculate all dynamic parameters for optimal text fitting with precision"""
+        full_text = f"● {hospital_name}"
+        text_length = len(full_text)
+        word_count = len(full_text.split())
+        
+        # Dynamic radius calculation based on text complexity
+        center = size // 2
+        base_radius = center - 20  # Base margin
+        
+        # Calculate optimal outer radius based on text density
+        text_density = text_length / word_count  # Characters per word
+        
+        if text_length <= 15:
+            outer_radius = int(base_radius * 0.75)  # Compact for short text
+        elif text_length <= 25:
+            outer_radius = int(base_radius * 0.80)  # Medium radius
+        elif text_length <= 40:
+            outer_radius = int(base_radius * 0.85)  # Larger for long text
+        elif text_length <= 60:
+            outer_radius = int(base_radius * 0.90)  # Very large
+        else:
+            outer_radius = int(base_radius * 0.95)  # Maximum radius
+        
+        # Dynamic gap calculation for perfect text spacing
+        if text_length <= 20:
+            gap_ratio = 0.35  # Wider gap for short text
+        elif text_length <= 40:
+            gap_ratio = 0.32  # Medium gap
+        else:
+            gap_ratio = 0.28  # Narrower gap for long text
+        
+        radius_gap = max(40, int(outer_radius * gap_ratio))
+        inner_radius = outer_radius - radius_gap
+        
+        # Ensure minimum inner radius
+        min_inner_radius = int(size * 0.12)
+        if inner_radius < min_inner_radius:
+            inner_radius = min_inner_radius
+            outer_radius = inner_radius + radius_gap
+        
+        # Calculate text radius (middle of the gap)
+        text_radius = (outer_radius + inner_radius) // 2
+        
+        # Dynamic font size calculation
+        base_font_size = size // 12
+        
+        # Adjust font size based on text length and available space
+        circumference = 2 * math.pi * text_radius
+        text_width_needed = text_length * (base_font_size * 0.6)  # Approximate character width
+        
+        if text_width_needed > circumference * 0.8:  # Text too big for circle
+            font_size = max(8, int(base_font_size * 0.7))  # Reduce font size
+        elif text_width_needed < circumference * 0.5:  # Text too small
+            font_size = min(size // 8, int(base_font_size * 1.2))  # Increase font size
+        else:
+            font_size = base_font_size
+        
+        # Dynamic spacing calculation
+        available_circumference = circumference * 0.85  # Use 85% of circle
+        char_spacing_degrees = (available_circumference / text_length) * (360 / circumference)
+        
+        # Ensure minimum spacing
+        char_spacing_degrees = max(4, char_spacing_degrees)
+        
+        return {
+            'outer_radius': outer_radius,
+            'inner_radius': inner_radius,
+            'text_radius': text_radius,
+            'font_size': font_size,
+            'char_spacing': char_spacing_degrees,
+            'gap_width': radius_gap,
+            'text_length': text_length,
+            'word_count': word_count
+        }
+    
+    def _calculate_optimal_radius(self, hospital_name: str, size: int) -> Tuple[int, int]:
+        """Legacy method for backward compatibility"""
+        params = self._calculate_dynamic_parameters(hospital_name, size)
+        return params['outer_radius'], params['inner_radius']
+
     def generate_stamp(
         self, 
         hospital_name: str, 
@@ -81,16 +162,18 @@ class HospitalStampGenerator:
         image = Image.new('RGBA', (size, size), self.background_color)
         draw = ImageDraw.Draw(image)
         
-        # Calculate circle parameters
+        # Calculate all dynamic parameters for optimal fitting
         center = size // 2
-        radius = center - 10  # Leave some margin
+        params = self._calculate_dynamic_parameters(hospital_name, size)
+        outer_radius = params['outer_radius']
+        inner_radius = params['inner_radius']
         
         # Draw borders based on style and border_style
-        inner_radius = self._draw_borders(draw, center, radius, color, border_style, style)
+        self._draw_borders(draw, center, outer_radius, inner_radius, color, border_style, style)
         
-        # Calculate font size if not provided
+        # Use calculated dynamic font size
         if font_size is None:
-            font_size = self._calculate_font_size(hospital_name, size)
+            font_size = params['font_size']
         
         # Try to load a font, fallback to default if not available
         try:
@@ -104,9 +187,10 @@ class HospitalStampGenerator:
         # Prepare text for circular arrangement
         text_upper = hospital_name.upper()
         
-        # Draw text along the circle
+        # Draw text with dynamic precision positioning
+        text_radius = params['text_radius']  # Use calculated optimal radius
         self._draw_circular_text(
-            draw, text_upper, center, center, inner_radius - 15, font, color
+            draw, text_upper, center, center, text_radius, font, color
         )
         
         # Add center content based on style
@@ -120,18 +204,9 @@ class HospitalStampGenerator:
         return img_byte_arr.getvalue()
     
     def _calculate_font_size(self, text: str, stamp_size: int) -> int:
-        """Calculate appropriate font size based on text length and stamp size"""
-        base_size = stamp_size // 15
-        text_length = len(text)
-        
-        if text_length <= 15:
-            return base_size
-        elif text_length <= 25:
-            return max(base_size - 2, 12)
-        elif text_length <= 35:
-            return max(base_size - 4, 10)
-        else:
-            return max(base_size - 6, 8)
+        """Calculate dynamic font size - now integrated into _calculate_dynamic_parameters"""
+        params = self._calculate_dynamic_parameters(text, stamp_size)
+        return params['font_size']
     
     def _draw_circular_text(
         self, 
@@ -143,37 +218,139 @@ class HospitalStampGenerator:
         font: ImageFont.ImageFont, 
         color: Tuple[int, int, int, int]
     ):
-        """Draw text along a circular path"""
-        # Calculate angle step for each character
-        total_angle = 300  # degrees (leave some space at bottom)
-        start_angle = -150  # start angle in degrees
+        """Draw text along a circular path with characters in correct order"""
+        # Add filled dot symbol before hospital name
+        medical_symbol = "●"  # Filled dot symbol
+        full_text = f"{medical_symbol} {text}"  # Add symbol only at start
         
-        if len(text) > 1:
-            angle_step = total_angle / (len(text) - 1)
+        # Calculate text coverage for proper circular appearance
+        text_length = len(full_text)
+        
+        # Calculate word count for better spacing decisions
+        word_count = len(full_text.split())
+        
+        # DYNAMIC CIRCLE FILLING - Use full available space
+        # Always use maximum coverage with small gap for visual balance
+        coverage_angle = 350  # Use almost full circle (10° gap for balance)
+        
+        # For very short text, use slightly less to prevent over-spreading
+        if text_length <= 6:
+            coverage_angle = 320  # Don't over-spread very short text
+        elif text_length <= 12:
+            coverage_angle = 340  # Moderate coverage for short text
+        
+        # The text will now ALWAYS fill the available space dynamically
+        
+        # Calculate character spacing with word count adjustment
+        char_spacing = coverage_angle / text_length if text_length > 0 else 10
+        
+        # Adjust minimum spacing based on word count
+        if word_count > 5:
+            min_spacing = 6  # Tighter spacing for many words
+        elif word_count > 3:
+            min_spacing = 7  # Medium spacing
         else:
-            angle_step = 0
+            min_spacing = 8  # Standard spacing
         
-        for i, char in enumerate(text):
-            # Calculate angle for this character
-            angle = start_angle + (i * angle_step)
-            angle_rad = math.radians(angle)
+        # Ensure minimum spacing for readability
+        char_spacing = max(char_spacing, min_spacing)
+        
+        # Start angle (centered at top)
+        start_angle = -90 - (coverage_angle / 2)
+        
+        # Split into words for realistic spacing
+        words = full_text.split()
+        
+        # TRULY DYNAMIC SPACING - Fill the entire available circle
+        
+        # Calculate total characters (excluding spaces)
+        total_chars = len(full_text.replace(' ', ''))
+        
+        # Reserve space for word gaps (smaller, proportional gaps)
+        word_gap_ratio = 1.5  # Words are 1.5x character spacing apart
+        total_word_gaps = (len(words) - 1) * word_gap_ratio
+        
+        # Calculate dynamic character spacing to fill the entire coverage angle
+        # This ensures NO empty space between end and start
+        effective_units = total_chars + total_word_gaps  # Total spacing units needed
+        realistic_char_spacing = coverage_angle / effective_units if effective_units > 0 else 10
+        
+        # Apply reasonable bounds (not too tight, not too loose)
+        min_spacing = 3.0  # Minimum for readability
+        max_spacing = 25.0  # Maximum to prevent over-spreading short text
+        realistic_char_spacing = max(min_spacing, min(realistic_char_spacing, max_spacing))
+        
+        # Draw each word with dynamic spacing
+        current_angle = start_angle
+        
+        for word_idx, word in enumerate(words):
+            # Add dynamic spacing between words (proportional to character spacing)
+            if word_idx > 0:
+                current_angle += realistic_char_spacing * word_gap_ratio
             
-            # Calculate position
-            x = center_x + radius * math.cos(angle_rad)
-            y = center_y + radius * math.sin(angle_rad)
-            
-            # Get character size for centering
-            bbox = draw.textbbox((0, 0), char, font=font)
-            char_width = bbox[2] - bbox[0]
-            char_height = bbox[3] - bbox[1]
-            
-            # Draw character centered at calculated position
-            draw.text(
-                (x - char_width // 2, y - char_height // 2),
-                char,
-                font=font,
-                fill=color
-            )
+            # Draw characters in word with tight, realistic spacing
+            for char_idx, char in enumerate(word):
+                # Calculate position on circle
+                angle_rad = math.radians(current_angle)
+                x = center_x + radius * math.cos(angle_rad)
+                y = center_y + radius * math.sin(angle_rad)
+                
+                # Get character dimensions
+                bbox = draw.textbbox((0, 0), char, font=font)
+                char_width = bbox[2] - bbox[0]
+                char_height = bbox[3] - bbox[1]
+                
+                # Create temporary image for rotation
+                temp_size = max(char_width, char_height) + 30
+                temp_img = Image.new('RGBA', (temp_size, temp_size), (0, 0, 0, 0))
+                temp_draw = ImageDraw.Draw(temp_img)
+                
+                # Draw character in center with bold effect
+                bold_offsets = [(0, 0), (1, 0), (0, 1), (1, 1)]
+                char_x = temp_size // 2 - char_width // 2
+                char_y = temp_size // 2 - char_height // 2
+                
+                for dx, dy in bold_offsets:
+                    temp_draw.text(
+                        (char_x + dx, char_y + dy),
+                        char,
+                        font=font,
+                        fill=color
+                    )
+                
+                # Rotate character to follow curve (tangent to circle)
+                rotation_angle = current_angle + 90  # Perpendicular to radius
+                rotated_char = temp_img.rotate(-rotation_angle, expand=True)
+                
+                # Paste rotated character
+                rotated_width, rotated_height = rotated_char.size
+                paste_x = int(x - rotated_width // 2)
+                paste_y = int(y - rotated_height // 2)
+                
+                # Handle transparency
+                if rotated_char.mode == 'RGBA':
+                    r, g, b, a = rotated_char.split()
+                    mask = a
+                else:
+                    mask = None
+                
+                # Paste onto main image
+                main_img = draw._image
+                main_img.paste(rotated_char, (paste_x, paste_y), mask)
+                
+                # Move to next character with dynamic readable spacing
+                if char == medical_symbol:
+                    current_angle += realistic_char_spacing * 1.5  # Proper space after dot
+                else:
+                    # Dynamic character spacing within words - readable but natural
+                    if char in 'ILil|1':  # Narrow characters
+                        spacing_multiplier = 0.8  # Slightly closer for narrow chars
+                    elif char in 'MW@':   # Wide characters  
+                        spacing_multiplier = 1.2  # More space for wide chars
+                    else:  # Normal characters
+                        spacing_multiplier = 1.0  # Standard readable spacing
+                    
+                    current_angle += realistic_char_spacing * spacing_multiplier
     
     def save_stamp(self, hospital_name: str, filename: str, **kwargs) -> str:
         """
@@ -194,63 +371,26 @@ class HospitalStampGenerator:
         
         return filename
     
-    def _draw_borders(self, draw: ImageDraw.Draw, center: int, radius: int, 
+    def _draw_borders(self, draw: ImageDraw.Draw, center: int, outer_radius: int, inner_radius: int,
                      color: Tuple[int, int, int, int], border_style: str, 
-                     style: StampStyle) -> int:
-        """Draw stamp borders based on style"""
-        if border_style == "single":
-            # Single border
+                     style: StampStyle):
+        """Draw two circular lines - outer thick, inner thin with optimal spacing"""
+        
+        # Outer thick border (much broader)
+        outer_thickness = 12 if style == StampStyle.OFFICIAL else 10
+        for i in range(outer_thickness):
             draw.ellipse(
-                [center - radius, center - radius, center + radius, center + radius],
-                outline=color, width=4
-            )
-            inner_radius = radius - 25
-        elif border_style == "double":
-            # Double border (classic)
-            border_width = 6 if style == StampStyle.OFFICIAL else 4
-            
-            # Outer border
-            for i in range(border_width):
-                draw.ellipse(
-                    [center - radius + i, center - radius + i, 
-                     center + radius - i, center + radius - i],
-                    outline=color, width=1
-                )
-            
-            # Inner border
-            inner_radius = radius - 25
-            draw.ellipse(
-                [center - inner_radius, center - inner_radius,
-                 center + inner_radius, center + inner_radius],
-                outline=color, width=2
-            )
-        else:  # triple
-            # Triple border for official stamps
-            # Outer border
-            for i in range(8):
-                draw.ellipse(
-                    [center - radius + i, center - radius + i, 
-                     center + radius - i, center + radius - i],
-                    outline=color, width=1
-                )
-            
-            # Middle border
-            mid_radius = radius - 15
-            draw.ellipse(
-                [center - mid_radius, center - mid_radius,
-                 center + mid_radius, center + mid_radius],
-                outline=color, width=2
-            )
-            
-            # Inner border
-            inner_radius = radius - 30
-            draw.ellipse(
-                [center - inner_radius, center - inner_radius,
-                 center + inner_radius, center + inner_radius],
+                [center - outer_radius + i, center - outer_radius + i, 
+                 center + outer_radius - i, center + outer_radius - i],
                 outline=color, width=1
             )
         
-        return inner_radius
+        # Inner thin border - perfectly positioned based on calculations
+        draw.ellipse(
+            [center - inner_radius, center - inner_radius,
+             center + inner_radius, center + inner_radius],
+            outline=color, width=2
+        )
     
     def _draw_center_content(self, draw: ImageDraw.Draw, center: int, font_size: int,
                            color: Tuple[int, int, int, int], style: StampStyle,

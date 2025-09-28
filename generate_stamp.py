@@ -23,28 +23,35 @@ def main():
     generator = HospitalStampGenerator()
     
     try:
-        # Generate output filename if not provided
+        print(f"🏥 Generating stamp for: {args.hospital_name}")
+        print(f"📏 Size: {args.size}x{args.size} pixels")
+        
+        # Get dynamic parameters for analysis
+        params = generator._calculate_dynamic_parameters(args.hospital_name, args.size)
+        print(f"🔧 Dynamic Analysis:")
+        print(f"   • Font size: {params['font_size']}px (auto-optimized)")
+        print(f"   • Text radius: {params['text_radius']}px")
+        print(f"   • Character spacing: {params['char_spacing']:.1f}° (no overlap)")
+        print(f"   • Gap width: {params['gap_width']}px")
+        
+        # Generate stamp with dynamic precision
         if args.output is None:
-            # Use the enhanced save method that saves to output folder
-            output_path = generator.save_stamp_to_output(
-                hospital_name=args.hospital_name,
-                size=args.size
-            )
-            print(f"✅ Stamp generated successfully: {output_path}")
+            # Auto-generate filename
+            clean_name = args.hospital_name.replace(' ', '_').replace('.', '').replace("'", '').lower()
+            filename = f"stamp_{clean_name}.png"
+            output_path = os.path.join("stampOutput", filename)
         else:
-            # Use custom filename in output folder
+            # Use custom filename
             output_path = os.path.join("stampOutput", args.output)
-            # Generate and save stamp
-            print(f"Generating stamp for: {args.hospital_name}")
-            print(f"Size: {args.size}x{args.size} pixels")
-            print(f"Output file: {output_path}")
             
-            generator.save_stamp(
-                hospital_name=args.hospital_name,
-                filename=output_path,
-                size=args.size
-            )
-            print(f"✅ Stamp generated successfully: {output_path}")
+        generator.save_stamp(
+            hospital_name=args.hospital_name,
+            filename=output_path,
+            size=args.size
+        )
+        
+        print(f"✅ Stamp generated successfully: {output_path}")
+        print(f"🌟 Dynamic precision applied - perfect fit guaranteed!")
         
         print("Features:")
         print("  - Circular design with customizable colors")

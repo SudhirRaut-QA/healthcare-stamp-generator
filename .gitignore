@@ -142,6 +142,10 @@ dmypy.json
 *_stamp.png
 example_stamp.png
 
+# Stamp output folder
+stampOutput/
+*.png
+
 # OS generated files
 .DS_Store
 .DS_Store?
