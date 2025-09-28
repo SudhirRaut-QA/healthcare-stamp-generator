@@ -5,7 +5,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/SudhirRaut-QA/healthcare-stamp-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/SudhirRaut-QA/healthcare-stamp-generator/actions)
 
-A superfast and scalable healthcare application with an advanced hospital stamp generator module that creates professional circular stamps with dynamic spacing and authentic appearance.
+A superfast and scalable healthcare application with advanced stamp generator modules that create professional medical stamps with authentic appearance:
+
+- **🏥 Hospital Stamps** - Circular design with dynamic spacing and dual padding
+- **🩺 Doctor Stamps** - Clean borderless layout with brighter text and hierarchy
 
 ## ✨ Features
 
@@ -59,28 +62,32 @@ pip install -r requirements.txt
 ### Usage Options
 
 #### 1. **Command Line** (Fastest)
+
+**Hospital Stamps (Circular):**
 ```bash
 # Basic usage
 python generate_stamp.py "Your Hospital Name"
 
 # Custom size with dynamic analysis
 python generate_stamp.py "City Medical Center" --size 500
+```
 
-# Example output with dual padding system:
-# 🏥 Generating stamp for: City Medical Center
-# 📏 Size: 300x300 pixels
-# 🔧 Dynamic Analysis:
-#    • Font size: 30px (auto-optimized)
-#    • Text radius: 84px (dual padding applied)
-#    • Character spacing: 14.6° (no overlap)
-#    • Gap width: 45px
-# ✅ Stamp generated successfully!
+**Doctor Stamps (Rectangular):**
+```bash
+# Basic doctor stamp
+python generate_doctor_stamp.py "Dr. Sarah Johnson" "MBBS, MD (Cardiology)" "Reg. No: MCI-12345"
+
+# Custom size
+python generate_doctor_stamp.py "Dr. Michael Chen" "MBBS, MS (Orthopedics)" "Reg. No: MCI-67890" --width 500 --height 250
 ```
 
 #### 2. **Interactive Mode** (User-Friendly)
 ```bash
+# Hospital stamps
 python interactive_generator.py
-# Follow the prompts to enter hospital names
+
+# Doctor stamps  
+python interactive_doctor_generator.py
 ```
 
 #### 3. **Web API** (Integration)
@@ -89,10 +96,12 @@ python interactive_generator.py
 uvicorn app.main:app --reload
 
 # Access API docs at: http://localhost:8000/docs
-# Generate via API: POST /api/v1/stamp/generate
+# Hospital stamps: POST /api/v1/stamp/generate
+# Doctor stamps: POST /api/v1/doctor-stamp/generate
 ```
 
-> 📖 **See [USAGE_EXAMPLES.md](USAGE_EXAMPLES.md) for detailed examples and advanced features showcase**
+> 📖 **See [USAGE_EXAMPLES.md](USAGE_EXAMPLES.md) for hospital stamp examples**  
+> 📖 **See [DOCTOR_STAMP_GUIDE.md](DOCTOR_STAMP_GUIDE.md) for doctor stamp examples**
 
 ## 📊 Dynamic Spacing Examples
 
@@ -152,15 +161,23 @@ The generator automatically adapts to any hospital name length:
 ```
 healthcare-stamp-generator/
 ├── app/
-│   ├── modules/stamp_generator/
-│   │   └── generator.py          # Core stamp generation logic
+│   ├── modules/
+│   │   ├── stamp_generator/      # Hospital stamps (circular)
+│   │   │   └── generator.py      # Advanced dual padding system
+│   │   └── doctor_stamp/         # Doctor stamps (rectangular) 🆕
+│   │       └── generator.py      # Professional text hierarchy
 │   ├── api/                      # FastAPI routes
+│   │   ├── v1.py                 # Hospital stamp API
+│   │   └── doctor_stamp_routes.py # Doctor stamp API 🆕
 │   ├── models/                   # Data models
 │   └── main.py                   # FastAPI application
 ├── tests/                        # Test files
-├── stampOutput/                  # Generated stamps output
-├── generate_stamp.py             # Command-line generator
-├── interactive_generator.py      # Interactive CLI tool
+├── stampOutput/                  # Hospital stamps output
+├── doctorStampOutput/            # Doctor stamps output 🆕
+├── generate_stamp.py             # Hospital stamp CLI
+├── generate_doctor_stamp.py      # Doctor stamp CLI 🆕
+├── interactive_generator.py      # Hospital stamp interactive
+├── interactive_doctor_generator.py # Doctor stamp interactive 🆕
 └── requirements.txt              # Dependencies
 ```
 
@@ -216,11 +233,19 @@ When running the FastAPI server, visit:
 
 ### API Endpoints
 
+**Hospital Stamps (Circular):**
 - `POST /api/v1/stamp/generate` - Generate a hospital stamp
 - `GET /api/v1/health` - Health check endpoint
 
-### Usage Example
+**Doctor Stamps (Rectangular):** 🆕
+- `POST /api/v1/doctor-stamp/generate` - Generate a doctor stamp
+- `POST /api/v1/doctor-stamp/generate/image` - Get stamp as PNG image
+- `POST /api/v1/doctor-stamp/generate/batch` - Generate multiple doctor stamps
+- `GET /api/v1/doctor-stamp/health` - Doctor stamp service health
 
+### Usage Examples
+
+**Hospital Stamp API:**
 ```python
 import requests
 
@@ -231,6 +256,24 @@ response = requests.post(
 
 # Save the returned PNG image
 with open("hospital_stamp.png", "wb") as f:
+    f.write(response.content)
+```
+
+**Doctor Stamp API:** 🆕
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/api/v1/doctor-stamp/generate/image",
+    json={
+        "doctor_name": "Dr. Sarah Johnson",
+        "degree": "MBBS, MD (Cardiology)",
+        "registration_number": "Reg. No: MCI-12345"
+    }
+)
+
+# Save the returned PNG image
+with open("doctor_stamp.png", "wb") as f:
     f.write(response.content)
 ```
 

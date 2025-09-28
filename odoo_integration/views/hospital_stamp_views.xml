@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Hospital Stamp Tree View -->
+    <record id="hospital_stamp_tree_view" model="ir.ui.view">
+        <field name="name">healthcare.hospital.stamp.tree</field>
+        <field name="model">healthcare.hospital.stamp</field>
+        <field name="arch" type="xml">
+            <tree string="Hospital Stamps" decoration-success="state=='generated'" decoration-muted="state=='archived'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="size"/>
+                <field name="state"/>
+                <field name="generated_date"/>
+                <field name="generated_by"/>
+                <button name="action_generate_stamp" 
+                        type="object" 
+                        string="Generate" 
+                        icon="fa-magic" 
+                        attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                <button name="action_download_stamp" 
+                        type="object" 
+                        string="Download" 
+                        icon="fa-download" 
+                        attrs="{'invisible': [('state', '!=', 'generated')]}"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- Hospital Stamp Form View -->
+    <record id="hospital_stamp_form_view" model="ir.ui.view">
+        <field name="name">healthcare.hospital.stamp.form</field>
+        <field name="model">healthcare.hospital.stamp</field>
+        <field name="arch" type="xml">
+            <form string="Hospital Stamp">
+                <header>
+                    <button name="action_generate_stamp" 
+                            type="object" 
+                            string="Generate Stamp" 
+                            class="oe_highlight" 
+                            attrs="{'invisible': [('state', 'in', ['generated', 'archived'])]}"/>
+                    <button name="action_download_stamp" 
+                            type="object" 
+                            string="Download" 
+                            attrs="{'invisible': [('state', '!=', 'generated')]}"/>
+                    <button name="action_archive" 
+                            type="object" 
+                            string="Archive" 
+                            attrs="{'invisible': [('state', '!=', 'generated')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,generated"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_download_stamp" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-download" 
+                                attrs="{'invisible': [('state', '!=', 'generated')]}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Download</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <group>
+                        <group name="basic_info">
+                            <field name="name" placeholder="Enter hospital name..."/>
+                            <field name="partner_id" options="{'no_create': True}"/>
+                            <field name="size"/>
+                        </group>
+                        <group name="generation_info">
+                            <field name="generated_date" readonly="1"/>
+                            <field name="generated_by" readonly="1"/>
+                            <field name="stamp_filename" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Stamp Preview" attrs="{'invisible': [('stamp_image', '=', False)]}">
+                            <group>
+                                <field name="stamp_image" widget="image" class="oe_avatar" options="{'size': [300, 300]}"/>
+                            </group>
+                        </page>
+                        <page string="Information">
+                            <group>
+                                <field name="notes" placeholder="Additional notes about this stamp..."/>
+                                <field name="active"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Hospital Stamp Search View -->
+    <record id="hospital_stamp_search_view" model="ir.ui.view">
+        <field name="name">healthcare.hospital.stamp.search</field>
+        <field name="model">healthcare.hospital.stamp</field>
+        <field name="arch" type="xml">
+            <search string="Hospital Stamps">
+                <field name="name" string="Hospital Name"/>
+                <field name="partner_id" string="Partner"/>
+                <field name="generated_by" string="Generated By"/>
+                <separator/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="generated" string="Generated" domain="[('state', '=', 'generated')]"/>
+                <filter name="archived" string="Archived" domain="[('state', '=', 'archived')]"/>
+                <separator/>
+                <filter name="my_stamps" string="My Stamps" domain="[('generated_by', '=', uid)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_partner" string="Partner" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_generated_by" string="Generated By" context="{'group_by': 'generated_by'}"/>
+                    <filter name="group_generated_date" string="Generation Date" context="{'group_by': 'generated_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Hospital Stamp Action -->
+    <record id="action_hospital_stamp_list" model="ir.actions.act_window">
+        <field name="name">Hospital Stamps</field>
+        <field name="res_model">healthcare.hospital.stamp</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="hospital_stamp_search_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Hospital Stamp!
+            </p>
+            <p>
+                Generate professional circular hospital stamps with dynamic spacing and authentic medical appearance.
+                Perfect for healthcare facilities and medical documentation.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Partner Hospital Stamp View Extension -->
+    <record id="partner_form_hospital_stamp" model="ir.ui.view">
+        <field name="name">res.partner.form.hospital.stamp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_create_hospital_stamp" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-certificate" 
+                        attrs="{'invisible': [('is_company', '=', False)]}">
+                    <field name="hospital_stamp_count" widget="statinfo" string="Stamps"/>
+                </button>
+            </div>
+        </field>
+    </record>
+    
+</odoo>

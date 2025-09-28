@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_healthcare_stamps_root" 
+              name="Healthcare Stamps" 
+              sequence="10" 
+              web_icon="healthcare_stamp,static/description/icon.png"/>
+    
+    <!-- Hospital Stamps Menu -->
+    <menuitem id="menu_hospital_stamps" 
+              name="Hospital Stamps" 
+              parent="menu_healthcare_stamps_root" 
+              sequence="10"/>
+    
+    <menuitem id="menu_hospital_stamps_list" 
+              name="Hospital Stamps" 
+              parent="menu_hospital_stamps" 
+              action="action_hospital_stamp_list" 
+              sequence="10"/>
+    
+    <!-- Doctor Stamps Menu -->
+    <menuitem id="menu_doctor_stamps" 
+              name="Doctor Stamps" 
+              parent="menu_healthcare_stamps_root" 
+              sequence="20"/>
+    
+    <menuitem id="menu_doctor_stamps_list" 
+              name="Doctor Stamps" 
+              parent="menu_doctor_stamps" 
+              action="action_doctor_stamp_list" 
+              sequence="10"/>
+    
+    <!-- Configuration Menu -->
+    <menuitem id="menu_stamp_configuration" 
+              name="Configuration" 
+              parent="menu_healthcare_stamps_root" 
+              sequence="90"/>
+    
+    <!-- Batch Generation Menu -->
+    <menuitem id="menu_batch_generation" 
+              name="Batch Generation" 
+              parent="menu_healthcare_stamps_root" 
+              sequence="30"/>
+    
+</odoo>

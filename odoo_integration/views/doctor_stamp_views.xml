@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Doctor Stamp Tree View -->
+    <record id="doctor_stamp_tree_view" model="ir.ui.view">
+        <field name="name">healthcare.doctor.stamp.tree</field>
+        <field name="model">healthcare.doctor.stamp</field>
+        <field name="arch" type="xml">
+            <tree string="Doctor Stamps" decoration-success="state=='generated'" decoration-muted="state=='archived'">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="degree"/>
+                <field name="registration_number"/>
+                <field name="specialization"/>
+                <field name="state"/>
+                <field name="generated_date"/>
+                <button name="action_generate_stamp" 
+                        type="object" 
+                        string="Generate" 
+                        icon="fa-magic" 
+                        attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                <button name="action_download_stamp" 
+                        type="object" 
+                        string="Download" 
+                        icon="fa-download" 
+                        attrs="{'invisible': [('state', '!=', 'generated')]}"/>
+                <button name="action_preview_stamp" 
+                        type="object" 
+                        string="Preview" 
+                        icon="fa-eye" 
+                        attrs="{'invisible': [('state', '!=', 'generated')]}"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- Doctor Stamp Form View -->
+    <record id="doctor_stamp_form_view" model="ir.ui.view">
+        <field name="name">healthcare.doctor.stamp.form</field>
+        <field name="model">healthcare.doctor.stamp</field>
+        <field name="arch" type="xml">
+            <form string="Doctor Stamp">
+                <header>
+                    <button name="action_generate_stamp" 
+                            type="object" 
+                            string="Generate Stamp" 
+                            class="oe_highlight" 
+                            attrs="{'invisible': [('state', 'in', ['generated', 'archived'])]}"/>
+                    <button name="action_download_stamp" 
+                            type="object" 
+                            string="Download" 
+                            attrs="{'invisible': [('state', '!=', 'generated')]}"/>
+                    <button name="action_preview_stamp" 
+                            type="object" 
+                            string="Preview" 
+                            attrs="{'invisible': [('state', '!=', 'generated')]}"/>
+                    <button name="action_archive" 
+                            type="object" 
+                            string="Archive" 
+                            attrs="{'invisible': [('state', '!=', 'generated')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,generated"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_download_stamp" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-download" 
+                                attrs="{'invisible': [('state', '!=', 'generated')]}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Download</span>
+                            </div>
+                        </button>
+                        <button name="action_preview_stamp" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-eye" 
+                                attrs="{'invisible': [('state', '!=', 'generated')]}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Preview</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <group>
+                        <group name="basic_info">
+                            <field name="name" placeholder="Dr. John Smith"/>
+                            <field name="employee_id" options="{'no_create': True}"/>
+                            <field name="degree" placeholder="MBBS, MD (Cardiology)"/>
+                            <field name="registration_number" placeholder="Reg. No: MCI-12345"/>
+                        </group>
+                        <group name="additional_info">
+                            <field name="specialization" placeholder="Cardiology"/>
+                            <field name="department" placeholder="Cardiology Department"/>
+                            <field name="width"/>
+                            <field name="height"/>
+                        </group>
+                    </group>
+                    
+                    <group name="generation_info" string="Generation Information" attrs="{'invisible': [('state', '=', 'draft')]}">
+                        <group>
+                            <field name="generated_date" readonly="1"/>
+                            <field name="generated_by" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="stamp_filename" readonly="1"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Stamp Preview" attrs="{'invisible': [('stamp_image', '=', False)]}">
+                            <group>
+                                <field name="stamp_image" widget="image" options="{'size': [400, 200]}"/>
+                            </group>
+                        </page>
+                        <page string="Information">
+                            <group>
+                                <field name="notes" placeholder="Additional notes about this doctor stamp..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Doctor Stamp Preview Form (for popup) -->
+    <record id="doctor_stamp_preview_form" model="ir.ui.view">
+        <field name="name">healthcare.doctor.stamp.preview.form</field>
+        <field name="model">healthcare.doctor.stamp</field>
+        <field name="arch" type="xml">
+            <form string="Stamp Preview" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h3><field name="degree" readonly="1"/></h3>
+                        <h4><field name="registration_number" readonly="1"/></h4>
+                    </div>
+                    <group>
+                        <field name="stamp_image" widget="image" options="{'size': [400, 200]}" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Doctor Stamp Search View -->
+    <record id="doctor_stamp_search_view" model="ir.ui.view">
+        <field name="name">healthcare.doctor.stamp.search</field>
+        <field name="model">healthcare.doctor.stamp</field>
+        <field name="arch" type="xml">
+            <search string="Doctor Stamps">
+                <field name="name" string="Doctor Name"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="degree" string="Degree"/>
+                <field name="registration_number" string="Registration"/>
+                <field name="specialization" string="Specialization"/>
+                <field name="department" string="Department"/>
+                <separator/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="generated" string="Generated" domain="[('state', '=', 'generated')]"/>
+                <filter name="archived" string="Archived" domain="[('state', '=', 'archived')]"/>
+                <separator/>
+                <filter name="my_stamps" string="My Stamps" domain="[('generated_by', '=', uid)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_employee" string="Employee" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_specialization" string="Specialization" context="{'group_by': 'specialization'}"/>
+                    <filter name="group_department" string="Department" context="{'group_by': 'department'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_generated_by" string="Generated By" context="{'group_by': 'generated_by'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Doctor Stamp Action -->
+    <record id="action_doctor_stamp_list" model="ir.actions.act_window">
+        <field name="name">Doctor Stamps</field>
+        <field name="res_model">healthcare.doctor.stamp</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="doctor_stamp_search_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Doctor Stamp!
+            </p>
+            <p>
+                Generate professional rectangular doctor stamps with realistic fonts and vibrant colors.
+                Perfect for medical professionals and healthcare documentation.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Employee Doctor Stamp View Extension -->
+    <record id="employee_form_doctor_stamp" model="ir.ui.view">
+        <field name="name">hr.employee.form.doctor.stamp</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_create_doctor_stamp" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-user-md">
+                    <field name="doctor_stamp_count" widget="statinfo" string="Stamps"/>
+                </button>
+            </div>
+            <page name="public" position="after">
+                <page string="Medical Information" name="medical_info">
+                    <group>
+                        <group name="medical_qualifications">
+                            <field name="medical_degree"/>
+                            <field name="medical_registration"/>
+                            <field name="medical_specialization"/>
+                        </group>
+                    </group>
+                    <separator string="Doctor Stamps"/>
+                    <field name="doctor_stamp_ids" nolabel="1">
+                        <tree>
+                            <field name="name"/>
+                            <field name="degree"/>
+                            <field name="registration_number"/>
+                            <field name="state"/>
+                            <button name="action_generate_stamp" 
+                                    type="object" 
+                                    string="Generate" 
+                                    icon="fa-magic" 
+                                    attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        </tree>
+                    </field>
+                </page>
+            </page>
+        </field>
+    </record>
+    
+</odoo>

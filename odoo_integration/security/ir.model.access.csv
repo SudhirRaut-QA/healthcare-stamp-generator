@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hospital_stamp_user,hospital_stamp_user,model_healthcare_hospital_stamp,base.group_user,1,1,1,0
+access_hospital_stamp_manager,hospital_stamp_manager,model_healthcare_hospital_stamp,base.group_system,1,1,1,1
+access_doctor_stamp_user,doctor_stamp_user,model_healthcare_doctor_stamp,base.group_user,1,1,1,0
+access_doctor_stamp_manager,doctor_stamp_manager,model_healthcare_doctor_stamp,base.group_system,1,1,1,1

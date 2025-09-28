@@ -142,8 +142,9 @@ dmypy.json
 *_stamp.png
 example_stamp.png
 
-# Stamp output folder
+# Stamp output folders
 stampOutput/
+doctorStampOutput/
 *.png
 
 # OS generated files
