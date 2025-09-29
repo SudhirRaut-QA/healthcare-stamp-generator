@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Document Stamper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0066ff 0%, #0080ff 100%);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .preview-area {
+            flex: 1;
+            padding: 20px;
+            background: #ffffff;
+            position: relative;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #0066ff;
+            padding-bottom: 8px;
+        }
+
+        .upload-area {
+            border: 3px dashed #0066ff;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #0052cc;
+            background: #f0f4ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #00cc00;
+            background: #f0fff0;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #0066ff;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+            display: inline-block;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .stamp-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stamp-form {
+            display: none;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0066ff;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+
+        .document-preview {
+            text-align: center;
+            min-height: 400px;
+            position: relative;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: #f8f9fa;
+            overflow: hidden;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            cursor: crosshair;
+        }
+
+        .page-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            gap: 10px;
+        }
+
+        .page-info {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0066ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .stamps-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background: white;
+        }
+
+        .stamp-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stamp-item:last-child {
+            border-bottom: none;
+        }
+
+        .stamp-info {
+            flex: 1;
+        }
+
+        .stamp-type {
+            font-weight: 500;
+            color: #0066ff;
+        }
+
+        .stamp-position {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .stamp-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .range-control {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .range-control input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            outline: none;
+            appearance: none;
+        }
+
+        .range-control input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0066ff;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .stamp-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Healthcare Document Stamper</h1>
+            <p>Interactive document stamping with drag & drop functionality</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <!-- Document Upload Section -->
+                <div class="section">
+                    <h3>📄 Document Upload</h3>
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">📎</div>
+                        <p><strong>Click to upload</strong> or drag & drop</p>
+                        <p>Supports PDF, PNG, JPG, BMP, TIFF</p>
+                        <input type="file" id="fileInput" class="file-input" accept=".pdf,.png,.jpg,.jpeg,.bmp,.tiff,.gif">
+                    </div>
+                    
+                    <div class="alert alert-info" id="uploadInfo"></div>
+                    <div class="alert alert-success" id="uploadSuccess"></div>
+                    <div class="alert alert-danger" id="uploadError"></div>
+                </div>
+
+                <!-- Document Info Section -->
+                <div class="section" id="documentInfo" style="display: none;">
+                    <h3>📋 Document Information</h3>
+                    <div id="docDetails"></div>
+                    <div class="stats-grid" id="docStats"></div>
+                </div>
+
+                <!-- Stamp Controls Section -->
+                <div class="section" id="stampControls" style="display: none;">
+                    <h3>🔖 Add Stamps</h3>
+                    <div class="stamp-controls">
+                        <button class="btn btn-success" onclick="showStampForm('hospital')">
+                            🏥 Hospital Stamp
+                        </button>
+                        <button class="btn btn-success" onclick="showStampForm('doctor')">
+                            🩺 Doctor Stamp
+                        </button>
+                    </div>
+
+                    <!-- Hospital Stamp Form -->
+                    <div id="hospitalStampForm" class="stamp-form">
+                        <h4>🏥 Hospital Stamp</h4>
+                        <div class="form-group">
+                            <label for="hospitalName">Hospital Name:</label>
+                            <input type="text" id="hospitalName" class="form-control" 
+                                   placeholder="Enter hospital name">
+                        </div>
+                        <div class="form-group">
+                            <label>Position (click on document to place)</label>
+                            <p style="font-size: 0.9rem; color: #666;">
+                                Click anywhere on the document preview to place the stamp
+                            </p>
+                        </div>
+                        <button class="btn btn-success btn-small" onclick="addHospitalStamp()">
+                            Add Hospital Stamp
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="hideStampForms()">
+                            Cancel
+                        </button>
+                    </div>
+
+                    <!-- Doctor Stamp Form -->
+                    <div id="doctorStampForm" class="stamp-form">
+                        <h4>🩺 Doctor Stamp</h4>
+                        <div class="form-group">
+                            <label for="doctorName">Doctor Name:</label>
+                            <input type="text" id="doctorName" class="form-control" 
+                                   placeholder="Dr. John Smith">
+                        </div>
+                        <div class="form-group">
+                            <label for="doctorDegree">Degree:</label>
+                            <input type="text" id="doctorDegree" class="form-control" 
+                                   placeholder="MBBS, MD">
+                        </div>
+                        <div class="form-group">
+                            <label for="doctorReg">Registration Number:</label>
+                            <input type="text" id="doctorReg" class="form-control" 
+                                   placeholder="MCI-12345">
+                        </div>
+                        <div class="form-group">
+                            <label>Position (click on document to place)</label>
+                            <p style="font-size: 0.9rem; color: #666;">
+                                Click anywhere on the document preview to place the stamp
+                            </p>
+                        </div>
+                        <button class="btn btn-success btn-small" onclick="addDoctorStamp()">
+                            Add Doctor Stamp
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="hideStampForms()">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stamps Management Section -->
+                <div class="section" id="stampsManagement" style="display: none;">
+                    <h3>🎯 Manage Stamps</h3>
+                    <div style="margin-bottom: 15px;">
+                        <button class="btn btn-secondary btn-small" onclick="toggleStampBoundaries()">
+                            👁️ Toggle Boundaries
+                        </button>
+                        <button class="btn btn-danger btn-small" onclick="clearAllStamps()">
+                            🗑️ Clear All
+                        </button>
+                    </div>
+                    
+                    <div class="stamps-list" id="stampsList">
+                        <p style="text-align: center; padding: 20px; color: #666;">
+                            No stamps added yet
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="section" id="exportOptions" style="display: none;">
+                    <h3>💾 Export & Save</h3>
+                    <button class="btn btn-success" onclick="downloadStampedDocument()">
+                        📥 Download Stamped Document
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportStampConfig()">
+                        ⚙️ Export Configuration
+                    </button>
+                </div>
+            </div>
+
+            <div class="preview-area">
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Processing document...</p>
+                </div>
+
+                <div id="documentPreview" style="display: none;">
+                    <!-- Page Navigation -->
+                    <div class="page-navigation" id="pageNavigation" style="display: none;">
+                        <button class="btn btn-secondary btn-small" onclick="previousPage()">
+                            ◀️ Previous
+                        </button>
+                        <div class="page-info">
+                            Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                        </div>
+                        <button class="btn btn-secondary btn-small" onclick="nextPage()">
+                            Next ▶️
+                        </button>
+                    </div>
+
+                    <!-- Document Preview -->
+                    <div class="document-preview" id="previewContainer">
+                        <img id="previewImage" class="preview-image" alt="Document Preview">
+                    </div>
+
+                    <!-- Preview Controls -->
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button class="btn btn-secondary btn-small" onclick="refreshPreview()">
+                            🔄 Refresh Preview
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="fitToWidth()">
+                            📏 Fit to Width
+                        </button>
+                    </div>
+                </div>
+
+                <div id="welcomeMessage" class="document-preview">
+                    <div style="padding: 60px 40px; text-align: center; color: #666;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">📄</div>
+                        <h2>Welcome to Healthcare Document Stamper</h2>
+                        <p style="font-size: 1.1rem; margin-top: 15px;">
+                            Upload a prescription, invoice, or any healthcare document to get started
+                        </p>
+                        <div style="margin-top: 30px;">
+                            <h3>Features:</h3>
+                            <ul style="list-style: none; padding: 0; margin-top: 15px;">
+                                <li style="margin: 10px 0;">🔖 Add hospital and doctor stamps</li>
+                                <li style="margin: 10px 0;">📍 Click to place stamps anywhere</li>
+                                <li style="margin: 10px 0;">✋ Drag to move stamps</li>
+                                <li style="margin: 10px 0;">📏 Resize and rotate stamps</li>
+                                <li style="margin: 10px 0;">👁️ Real-time preview</li>
+                                <li style="margin: 10px 0;">💾 Download stamped documents</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let sessionId = null;
+        let documentData = null;
+        let currentPageNumber = 1;
+        let totalPages = 1;
+        let showingBoundaries = false;
+        let stampClickPosition = { x: 0.5, y: 0.5 };
+        let activeStampType = null;
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            createSession();
+            setupEventListeners();
+        });
+
+        // Create new session
+        async function createSession() {
+            try {
+                const response = await fetch('/api/v1/document-stamper/session/create', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    sessionId = data.session_id;
+                    console.log('Session created:', sessionId);
+                } else {
+                    showError('Failed to create session');
+                }
+            } catch (error) {
+                console.error('Error creating session:', error);
+                showError('Failed to initialize application');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.querySelector('.upload-area');
+            const previewImage = document.getElementById('previewImage');
+
+            // File input change
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+
+            // Preview image click for stamp placement
+            previewImage.addEventListener('click', handlePreviewClick);
+        }
+
+        // Handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadDocument(file);
+            }
+        }
+
+        // Handle drag over
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        // Handle drag leave
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        // Handle drop
+        function handleDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                uploadDocument(files[0]);
+            }
+        }
+
+        // Upload document
+        async function uploadDocument(file) {
+            if (!sessionId) {
+                showError('Session not initialized');
+                return;
+            }
+
+            showLoading(true);
+            hideAlerts();
+
+            const formData = new FormData();
+            formData.append('session_id', sessionId);
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/v1/document-stamper/document/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    documentData = data;
+                    totalPages = data.page_count;
+                    currentPageNumber = 1;
+                    
+                    showDocumentInfo(data);
+                    showDocumentPreview();
+                    loadPagePreview(1);
+                    
+                    showSuccess(`Document uploaded successfully! ${data.page_count} page(s) loaded.`);
+                } else {
+                    showError('Failed to upload document: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showError('Failed to upload document');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Show document information
+        function showDocumentInfo(data) {
+            const docDetails = document.getElementById('docDetails');
+            const docStats = document.getElementById('docStats');
+
+            docDetails.innerHTML = `
+                <p><strong>File:</strong> ${data.metadata.filename}</p>
+                <p><strong>Type:</strong> ${data.document_type}</p>
+                <p><strong>Pages:</strong> ${data.page_count}</p>
+            `;
+
+            docStats.innerHTML = `
+                <div class="stat-card">
+                    <span class="stat-number">${data.page_count}</span>
+                    <span class="stat-label">Pages</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Stamps</span>
+                </div>
+            `;
+
+            document.getElementById('documentInfo').style.display = 'block';
+            document.getElementById('stampControls').style.display = 'block';
+            document.getElementById('stampsManagement').style.display = 'block';
+            document.getElementById('exportOptions').style.display = 'block';
+        }
+
+        // Show document preview
+        function showDocumentPreview() {
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('documentPreview').style.display = 'block';
+            
+            if (totalPages > 1) {
+                document.getElementById('pageNavigation').style.display = 'flex';
+            }
+            
+            updatePageNavigation();
+        }
+
+        // Load page preview
+        async function loadPagePreview(pageNumber) {
+            if (!sessionId || !documentData) return;
+
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/v1/document-stamper/preview/page', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        page_number: pageNumber,
+                        preview_width: 800,
+                        show_boundaries: showingBoundaries
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const previewImage = document.getElementById('previewImage');
+                    previewImage.src = data.base64;
+                    previewImage.onload = () => showLoading(false);
+                    
+                    currentPageNumber = pageNumber;
+                    updatePageNavigation();
+                    updateStampsList();
+                } else {
+                    showError('Failed to load page preview');
+                    showLoading(false);
+                }
+            } catch (error) {
+                console.error('Preview error:', error);
+                showError('Failed to load page preview');
+                showLoading(false);
+            }
+        }
+
+        // Handle preview image click for stamp placement
+        async function handlePreviewClick(event) {
+            if (!activeStampType) return;
+
+            const rect = event.target.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width;
+            const y = (event.clientY - rect.top) / rect.height;
+
+            stampClickPosition = { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
+
+            // Add stamp based on active type
+            if (activeStampType === 'hospital') {
+                await addHospitalStamp();
+            } else if (activeStampType === 'doctor') {
+                await addDoctorStamp();
+            }
+        }
+
+        // Show stamp form
+        function showStampForm(type) {
+            hideStampForms();
+            document.getElementById(type + 'StampForm').style.display = 'block';
+            activeStampType = type;
+            
+            // Change cursor to indicate stamp placement mode
+            document.getElementById('previewImage').style.cursor = 'crosshair';
+            
+            showInfo(`Click anywhere on the document to place the ${type} stamp`);
+        }
+
+        // Hide stamp forms
+        function hideStampForms() {
+            document.getElementById('hospitalStampForm').style.display = 'none';
+            document.getElementById('doctorStampForm').style.display = 'none';
+            activeStampType = null;
+            
+            // Reset cursor
+            document.getElementById('previewImage').style.cursor = 'default';
+            
+            hideAlerts();
+        }
+
+        // Add hospital stamp
+        async function addHospitalStamp() {
+            const hospitalName = document.getElementById('hospitalName').value.trim();
+            
+            if (!hospitalName) {
+                showError('Please enter hospital name');
+                return;
+            }
+
+            if (!sessionId) {
+                showError('Session not initialized');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/v1/document-stamper/stamp/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        page_number: currentPageNumber,
+                        stamp_type: 'hospital',
+                        hospital_name: hospitalName,
+                        x: stampClickPosition.x,
+                        y: stampClickPosition.y
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Hospital stamp added successfully!');
+                    document.getElementById('hospitalName').value = '';
+                    hideStampForms();
+                    refreshPreview();
+                } else {
+                    showError('Failed to add hospital stamp: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Add hospital stamp error:', error);
+                showError('Failed to add hospital stamp');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Add doctor stamp
+        async function addDoctorStamp() {
+            const doctorName = document.getElementById('doctorName').value.trim();
+            const doctorDegree = document.getElementById('doctorDegree').value.trim();
+            const doctorReg = document.getElementById('doctorReg').value.trim();
+            
+            if (!doctorName || !doctorDegree || !doctorReg) {
+                showError('Please fill in all doctor stamp fields');
+                return;
+            }
+
+            if (!sessionId) {
+                showError('Session not initialized');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/v1/document-stamper/stamp/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        page_number: currentPageNumber,
+                        stamp_type: 'doctor',
+                        doctor_name: doctorName,
+                        degree: doctorDegree,
+                        registration_number: doctorReg,
+                        x: stampClickPosition.x,
+                        y: stampClickPosition.y
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Doctor stamp added successfully!');
+                    document.getElementById('doctorName').value = '';
+                    document.getElementById('doctorDegree').value = '';
+                    document.getElementById('doctorReg').value = '';
+                    hideStampForms();
+                    refreshPreview();
+                } else {
+                    showError('Failed to add doctor stamp: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Add doctor stamp error:', error);
+                showError('Failed to add doctor stamp');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Refresh preview
+        function refreshPreview() {
+            loadPagePreview(currentPageNumber);
+        }
+
+        // Toggle stamp boundaries
+        function toggleStampBoundaries() {
+            showingBoundaries = !showingBoundaries;
+            refreshPreview();
+        }
+
+        // Clear all stamps
+        async function clearAllStamps() {
+            if (!confirm('Are you sure you want to clear all stamps?')) return;
+
+            if (!sessionId) return;
+
+            try {
+                const response = await fetch(`/api/v1/document-stamper/stamps/${sessionId}/clear`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess(data.message);
+                    refreshPreview();
+                } else {
+                    showError('Failed to clear stamps');
+                }
+            } catch (error) {
+                console.error('Clear stamps error:', error);
+                showError('Failed to clear stamps');
+            }
+        }
+
+        // Update stamps list
+        async function updateStampsList() {
+            if (!sessionId) return;
+
+            try {
+                const response = await fetch(`/api/v1/document-stamper/stamps/${sessionId}/list?page_number=${currentPageNumber}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const stampsList = document.getElementById('stampsList');
+                    
+                    if (data.stamps.length === 0) {
+                        stampsList.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No stamps on this page</p>';
+                    } else {
+                        stampsList.innerHTML = data.stamps.map(stamp => `
+                            <div class="stamp-item">
+                                <div class="stamp-info">
+                                    <div class="stamp-type">${stamp.stamp_type.toUpperCase()} STAMP</div>
+                                    <div class="stamp-position">Position: ${Math.round(stamp.x * 100)}%, ${Math.round(stamp.y * 100)}%</div>
+                                </div>
+                                <div class="stamp-actions">
+                                    <button class="btn btn-danger btn-small" onclick="deleteStamp('${stamp.stamp_id}')">🗑️</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+
+                    // Update stats
+                    updateStampStats();
+                }
+            } catch (error) {
+                console.error('Update stamps list error:', error);
+            }
+        }
+
+        // Delete stamp
+        async function deleteStamp(stampId) {
+            if (!confirm('Are you sure you want to delete this stamp?')) return;
+
+            try {
+                const response = await fetch('/api/v1/document-stamper/stamp/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        stamp_id: stampId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Stamp deleted successfully');
+                    refreshPreview();
+                } else {
+                    showError('Failed to delete stamp');
+                }
+            } catch (error) {
+                console.error('Delete stamp error:', error);
+                showError('Failed to delete stamp');
+            }
+        }
+
+        // Update stamp statistics
+        async function updateStampStats() {
+            if (!sessionId) return;
+
+            try {
+                const response = await fetch(`/api/v1/document-stamper/stamps/${sessionId}/list`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const totalStamps = data.summary.total_stamps;
+                    const statCard = document.querySelector('.stat-card:last-child .stat-number');
+                    if (statCard) {
+                        statCard.textContent = totalStamps;
+                    }
+                }
+            } catch (error) {
+                console.error('Update stats error:', error);
+            }
+        }
+
+        // Page navigation
+        function previousPage() {
+            if (currentPageNumber > 1) {
+                loadPagePreview(currentPageNumber - 1);
+            }
+        }
+
+        function nextPage() {
+            if (currentPageNumber < totalPages) {
+                loadPagePreview(currentPageNumber + 1);
+            }
+        }
+
+        function updatePageNavigation() {
+            document.getElementById('currentPage').textContent = currentPageNumber;
+            document.getElementById('totalPages').textContent = totalPages;
+        }
+
+        // Fit to width
+        function fitToWidth() {
+            const previewImage = document.getElementById('previewImage');
+            const container = document.getElementById('previewContainer');
+            previewImage.style.maxWidth = '100%';
+            previewImage.style.height = 'auto';
+        }
+
+        // Download stamped document
+        function downloadStampedDocument() {
+            showInfo('Download functionality will be implemented in the next update');
+        }
+
+        // Export stamp configuration
+        async function exportStampConfig() {
+            if (!sessionId) return;
+
+            try {
+                const response = await fetch(`/api/v1/document-stamper/stamps/${sessionId}/export`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `stamps_config_${sessionId.substring(0, 8)}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showSuccess('Stamp configuration exported successfully');
+                } else {
+                    showError('Failed to export configuration');
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                showError('Failed to export configuration');
+            }
+        }
+
+        // Utility functions
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showSuccess(message) {
+            hideAlerts();
+            const alert = document.getElementById('uploadSuccess');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 5000);
+        }
+
+        function showError(message) {
+            hideAlerts();
+            const alert = document.getElementById('uploadError');
+            alert.textContent = message;
+            alert.style.display = 'block';
+        }
+
+        function showInfo(message) {
+            hideAlerts();
+            const alert = document.getElementById('uploadInfo');
+            alert.textContent = message;
+            alert.style.display = 'block';
+        }
+
+        function hideAlerts() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => alert.style.display = 'none');
+        }
+    </script>
+</body>
+</html>
