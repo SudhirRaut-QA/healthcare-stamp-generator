@@ -24,7 +24,7 @@ from modules.document_stamper.preview_generator import PreviewGenerator
 from modules.stamp_generator.generator import HospitalStampGenerator
 from modules.doctor_stamp.generator import DoctorStampGenerator
 
-router = APIRouter(prefix="/api/v1/document-stamper", tags=["Document Stamping"])
+router = APIRouter(prefix="/api/document-stamper", tags=["Document Stamping"])
 
 # Global instances (in production, use proper session management)
 active_sessions = {}
@@ -170,13 +170,24 @@ async def upload_document(
         session.document_loaded = True
         session.document_data = document_result
         
+        # Remove PIL Image objects from pages data for JSON serialization
+        serializable_pages = []
+        for page in document_result['pages']:
+            serializable_page = {
+                'page_number': page['page_number'],
+                'base64': page['base64'],
+                'width': page['width'],
+                'height': page['height']
+            }
+            serializable_pages.append(serializable_page)
+        
         return DocumentUploadResponse(
             success=True,
             session_id=session_id,
             document_type=document_result['document_type'],
             page_count=document_result['page_count'],
             metadata=document_result['metadata'],
-            pages=document_result['pages']
+            pages=serializable_pages
         )
         
     except Exception as e:
@@ -335,9 +346,14 @@ async def generate_page_preview(request: PreviewRequest):
     if not page_data:
         raise HTTPException(status_code=404, detail="Page not found")
     
+    # Get PIL Image for preview generation
+    page_image = session.document_processor.get_page_image(request.page_number)
+    if not page_image:
+        raise HTTPException(status_code=500, detail="Could not retrieve page image for preview")
+    
     try:
         preview_result = session.preview_generator.generate_page_preview(
-            page_data['image'],
+            page_image,
             request.page_number,
             request.preview_width,
             request.preview_height,
@@ -383,7 +399,7 @@ async def get_page_preview_image(
         img_buffer.seek(0)
         
         return StreamingResponse(
-            io=img_buffer,
+            img_buffer,
             media_type="image/png",
             headers={
                 "Content-Disposition": f"inline; filename=page_{page_number}_preview.png"
@@ -499,6 +515,38 @@ async def list_active_sessions():
         "sessions": sessions_info
     }
 
+@router.get("/document/{session_id}/download")
+async def download_stamped_document(session_id: str, filename: Optional[str] = None):
+    """Download the final stamped document."""
+    session = get_session(session_id)
+    
+    if not session.document_loaded:
+        raise HTTPException(status_code=400, detail="No document loaded in session")
+    
+    try:
+        # Generate the final stamped document
+        stamped_document_bytes = session.document_processor.apply_stamps_and_export(
+            session.stamp_overlay
+        )
+        
+        # Determine filename
+        if not filename:
+            original_filename = getattr(session.document_processor, 'filename', 'document')
+            base_name = original_filename.rsplit('.', 1)[0] if '.' in original_filename else original_filename
+            filename = f"{base_name}_stamped.pdf"
+        
+        # Return the stamped document
+        return StreamingResponse(
+            BytesIO(stamped_document_bytes),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate stamped document: {str(e)}")
+
 @router.get("/health")
 async def health_check():
     """Health check endpoint for document stamping service."""
@@ -512,6 +560,7 @@ async def health_check():
             "Real-time preview generation",
             "Stamp manipulation (move, resize, rotate, opacity)",
             "Multi-page document support",
-            "Configuration import/export"
+            "Configuration import/export",
+            "Document download with stamps applied"
         ]
     }

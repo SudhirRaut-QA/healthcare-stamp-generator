@@ -37,17 +37,17 @@
     },
     'data': [
         'security/ir.model.access.csv',
-        'data/demo_data.xml',
+        # 'data/demo_data.xml',  # Uncomment if you create demo data
         'views/menu_views.xml',
         'views/hospital_stamp_views.xml',
         'views/doctor_stamp_views.xml',
-        'wizard/stamp_wizard_views.xml',
+        # 'wizard/stamp_wizard_views.xml',  # Uncomment when wizard is implemented
     ],
     'demo': [
-        'data/demo_data.xml',
+        # 'data/demo_data.xml',  # Uncomment if you create demo data
     ],
     'qweb': [
-        'static/src/xml/stamp_templates.xml',
+        # 'static/src/xml/stamp_templates.xml',  # Uncomment when QWeb templates are added
     ],
     'installable': True,
     'auto_install': False,

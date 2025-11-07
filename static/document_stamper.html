@@ -4,14 +4,182 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Healthcare Document Stamper</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        body {
+            /* Professional Button Styling */
+            .btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                outline: none;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+
+            .btn:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            }
+
+            .btn-success {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+            }
+
+            .btn-success:hover {
+                background: linear-gradient(135deg, #0e8074 0%, #2dd65b 100%);
+            }
+
+            .btn-warning {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+            }
+
+            .btn-warning:hover {
+                background: linear-gradient(135deg, #ee82f7 0%, #f34858 100%);
+            }
+
+            .btn-danger {
+                background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+                color: white;
+            }
+
+            .btn-danger:hover {
+                background: linear-gradient(135deg, #e8420f 0%, #e5a825 100%);
+            }
+
+            .btn-secondary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                opacity: 0.8;
+            }
+
+            .btn-secondary:hover {
+                opacity: 1;
+            }
+
+            .btn:disabled {
+                background: #e9ecef;
+                color: #6c757d;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+            .btn:disabled:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            /* Enhanced Stamp Interaction */
+            .stamp-overlay {
+                position: absolute;
+                background: rgba(0, 123, 255, 0.1);
+                border: 2px solid #007bff;
+                border-radius: 8px;
+                cursor: move;
+                user-select: none;
+                transition: all 0.2s ease;
+                min-width: 80px;
+                min-height: 60px;
+                z-index: 100;
+            }
+
+            .stamp-overlay:hover {
+                border-color: #007bff;
+                box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+                transform: scale(1.02);
+            }
+
+            .stamp-overlay.dragging {
+                border-color: #28a745;
+                box-shadow: 0 8px 16px rgba(40,167,69,0.4);
+                transform: scale(1.05);
+                z-index: 1000;
+            }
+
+            .document-preview {
+                transition: all 0.3s ease;
+            }
+
+            .document-preview:hover {
+                box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            }
+
+            /* Resize handles for stamps */
+            .resize-handle {
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: #007bff;
+                border: 1px solid white;
+                border-radius: 50%;
+                z-index: 101;
+            }
+
+            .resize-handle.nw {
+                top: -4px;
+                left: -4px;
+                cursor: nw-resize;
+            }
+
+            .resize-handle.ne {
+                top: -4px;
+                right: -4px;
+                cursor: ne-resize;
+            }
+
+            .resize-handle.sw {
+                bottom: -4px;
+                left: -4px;
+                cursor: sw-resize;
+            }
+
+            .resize-handle.se {
+                bottom: -4px;
+                right: -4px;
+                cursor: se-resize;
+            }
+
+            .stamp-content {
+                padding: 8px;
+                font-size: 12px;
+                font-weight: bold;
+                color: #007bff;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 6px;
+            }        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -61,8 +229,11 @@
         .preview-area {
             flex: 1;
             padding: 20px;
-            background: #ffffff;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .section {
@@ -196,20 +367,37 @@
 
         .document-preview {
             text-align: center;
-            min-height: 400px;
+            min-height: 500px;
             position: relative;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            background: #f8f9fa;
+            border: 3px solid #0066ff;
+            border-radius: 15px;
+            background: white;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.15);
+            margin: 20px auto;
+            max-width: 900px;
+            padding: 20px;
         }
 
         .preview-image {
             max-width: 100%;
-            max-height: 80vh;
-            border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            max-height: 70vh;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             cursor: crosshair;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+        }
+        
+        .preview-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+        }
+        
+        .preview-image.loading {
+            opacity: 0.7;
+            filter: blur(1px);
         }
 
         .page-navigation {
@@ -432,9 +620,17 @@
                                    placeholder="Enter hospital name">
                         </div>
                         <div class="form-group">
-                            <label>Position (click on document to place)</label>
-                            <p style="font-size: 0.9rem; color: #666;">
-                                Click anywhere on the document preview to place the stamp
+                            <label>Quick Position</label>
+                            <div style="display: flex; gap: 5px; margin: 5px 0; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('hospital', 0.1, 0.1)" style="font-size: 10px; padding: 4px 8px;">↖ Top</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('hospital', 0.5, 0.1)" style="font-size: 10px; padding: 4px 8px;">↑ Center Top</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('hospital', 0.9, 0.1)" style="font-size: 10px; padding: 4px 8px;">↗ Top Right</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('hospital', 0.1, 0.9)" style="font-size: 10px; padding: 4px 8px;">↙ Bottom</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('hospital', 0.5, 0.9)" style="font-size: 10px; padding: 4px 8px;">↓ Bottom Center</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('hospital', 0.9, 0.9)" style="font-size: 10px; padding: 4px 8px;">↘ Bottom Right</button>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #666;">
+                                Choose position or stamp will be placed randomly
                             </p>
                         </div>
                         <button class="btn btn-success btn-small" onclick="addHospitalStamp()">
@@ -464,9 +660,17 @@
                                    placeholder="MCI-12345">
                         </div>
                         <div class="form-group">
-                            <label>Position (click on document to place)</label>
-                            <p style="font-size: 0.9rem; color: #666;">
-                                Click anywhere on the document preview to place the stamp
+                            <label>Quick Position</label>
+                            <div style="display: flex; gap: 5px; margin: 5px 0; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('doctor', 0.1, 0.1)" style="font-size: 10px; padding: 4px 8px;">↖ Top</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('doctor', 0.5, 0.1)" style="font-size: 10px; padding: 4px 8px;">↑ Center Top</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('doctor', 0.9, 0.1)" style="font-size: 10px; padding: 4px 8px;">↗ Top Right</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('doctor', 0.1, 0.9)" style="font-size: 10px; padding: 4px 8px;">↙ Bottom</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('doctor', 0.5, 0.9)" style="font-size: 10px; padding: 4px 8px;">↓ Bottom Center</button>
+                                <button type="button" class="btn btn-secondary btn-small" onclick="setStampPosition('doctor', 0.9, 0.9)" style="font-size: 10px; padding: 4px 8px;">↘ Bottom Right</button>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #666;">
+                                Choose position or stamp will be placed randomly
                             </p>
                         </div>
                         <button class="btn btn-success btn-small" onclick="addDoctorStamp()">
@@ -578,6 +782,21 @@
         let showingBoundaries = false;
         let stampClickPosition = { x: 0.5, y: 0.5 };
         let activeStampType = null;
+        
+        // Position presets for hospital and doctor stamps
+        let selectedPositions = {
+            hospital: null,  // { x: 0.5, y: 0.9 }
+            doctor: null     // { x: 0.5, y: 0.9 }
+        };
+        
+        // Drag and resize variables
+        let isDragging = false;
+        let isResizing = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStamp = null;
+        let resizeHandle = null;
+        let stampElements = new Map(); // Track stamp elements by ID
 
         // Initialize application
         document.addEventListener('DOMContentLoaded', function() {
@@ -588,7 +807,7 @@
         // Create new session
         async function createSession() {
             try {
-                const response = await fetch('/api/v1/document-stamper/session/create', {
+                const response = await fetch('/api/document-stamper/session/create', {
                     method: 'POST'
                 });
                 const data = await response.json();
@@ -621,6 +840,13 @@
 
             // Preview image click for stamp placement
             previewImage.addEventListener('click', handlePreviewClick);
+            
+            // Enable drag and drop on preview container
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.style.position = 'relative';
+            
+            // Prevent default drag behavior on images
+            previewImage.addEventListener('dragstart', (e) => e.preventDefault());
         }
 
         // Handle file selection
@@ -668,7 +894,7 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch('/api/v1/document-stamper/document/upload', {
+                const response = await fetch('/api/document-stamper/document/upload', {
                     method: 'POST',
                     body: formData
                 });
@@ -684,7 +910,13 @@
                     showDocumentPreview();
                     loadPagePreview(1);
                     
-                    showSuccess(`Document uploaded successfully! ${data.page_count} page(s) loaded.`);
+                    // Check if PDF is using placeholders
+                    let message = `Document uploaded successfully! ${data.page_count} page(s) loaded.`;
+                    if (data.document_type === 'PDF' && data.metadata && !data.metadata.poppler_available) {
+                        message += ' ⚠️ PDF preview shows placeholders. Install Poppler for full content preview. Stamping still works!';
+                    }
+                    
+                    showSuccess(message);
                 } else {
                     showError('Failed to upload document: ' + (data.detail || 'Unknown error'));
                 }
@@ -701,11 +933,37 @@
             const docDetails = document.getElementById('docDetails');
             const docStats = document.getElementById('docStats');
 
-            docDetails.innerHTML = `
+            // Build details HTML with PDF status
+            let detailsHtml = `
                 <p><strong>File:</strong> ${data.metadata.filename}</p>
                 <p><strong>Type:</strong> ${data.document_type}</p>
                 <p><strong>Pages:</strong> ${data.page_count}</p>
             `;
+            
+            // Add PDF-specific information
+            if (data.document_type === 'PDF') {
+                const popplerAvailable = data.metadata?.poppler_available;
+                if (popplerAvailable) {
+                    detailsHtml += '<p><strong>PDF Preview:</strong> ✅ Full content</p>';
+                } else {
+                    detailsHtml += `
+                        <p><strong>PDF Preview:</strong> ⚠️ Placeholders</p>
+                        <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin-top: 8px; font-size: 0.9em; border-radius: 4px;">
+                            <strong>� Easy Setup Available!</strong><br>
+                            <p style="margin: 8px 0;">✅ Stamping works perfectly without setup</p>
+                            <p style="margin: 8px 0;">🎯 For full PDF preview, run the setup script:</p>
+                            <code style="background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: block; margin: 8px 0;">
+                                python setup_portable_poppler.py
+                            </code>
+                            <p style="margin: 8px 0; font-size: 0.85em; color: #666;">
+                                � No admin rights needed - portable installation
+                            </p>
+                        </div>
+                    `;
+                }
+            }
+
+            docDetails.innerHTML = detailsHtml;
 
             docStats.innerHTML = `
                 <div class="stat-card">
@@ -738,12 +996,20 @@
 
         // Load page preview
         async function loadPagePreview(pageNumber) {
-            if (!sessionId || !documentData) return;
+            if (!sessionId || !documentData) {
+                console.log('Cannot load preview: missing session or document data');
+                return;
+            }
 
+            console.log('Loading preview for page:', pageNumber);
             showLoading(true);
+            
+            // Add loading class to image
+            const previewImage = document.getElementById('previewImage');
+            previewImage.classList.add('loading');
 
             try {
-                const response = await fetch('/api/v1/document-stamper/preview/page', {
+                const response = await fetch('/api/document-stamper/preview/page', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -760,12 +1026,35 @@
 
                 if (data.success) {
                     const previewImage = document.getElementById('previewImage');
-                    previewImage.src = data.base64;
-                    previewImage.onload = () => showLoading(false);
+                    // Format base64 data as proper data URL
+                    if (data.base64 && !data.base64.startsWith('data:')) {
+                        previewImage.src = 'data:image/png;base64,' + data.base64;
+                    } else {
+                        previewImage.src = data.base64;
+                    }
+                    previewImage.onload = () => {
+                        showLoading(false);
+                        previewImage.classList.remove('loading');
+                        console.log('Preview image loaded successfully');
+                        
+                        // Create stamp overlays after image loads
+                        setTimeout(() => {
+                            updateStampsList();
+                        }, 100);
+                    };
+                    previewImage.onerror = () => {
+                        showLoading(false);
+                        previewImage.classList.remove('loading');
+                        console.error('Preview image failed to load');
+                        showError('Failed to display preview image');
+                    };
                     
                     currentPageNumber = pageNumber;
                     updatePageNavigation();
                     updateStampsList();
+                    
+                    // Clear stamp positions for new page
+                    lastStampPositions = [];
                 } else {
                     showError('Failed to load page preview');
                     showLoading(false);
@@ -777,15 +1066,27 @@
             }
         }
 
+        // Smart stamp positioning to prevent overlaps
+        let lastStampPositions = [];
+        const STAMP_SIZE = 0.15; // Estimated stamp size
+        
         // Handle preview image click for stamp placement
         async function handlePreviewClick(event) {
             if (!activeStampType) return;
 
             const rect = event.target.getBoundingClientRect();
-            const x = (event.clientX - rect.left) / rect.width;
-            const y = (event.clientY - rect.top) / rect.height;
+            let x = (event.clientX - rect.left) / rect.width;
+            let y = (event.clientY - rect.top) / rect.height;
 
-            stampClickPosition = { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
+            // Normalize coordinates
+            x = Math.max(0, Math.min(1, x));
+            y = Math.max(0, Math.min(1, y));
+            
+            // Check for overlaps and adjust position if needed
+            const adjustedPosition = findNonOverlappingPosition(x, y);
+            stampClickPosition = adjustedPosition;
+            
+            console.log('Stamp placement at:', stampClickPosition);
 
             // Add stamp based on active type
             if (activeStampType === 'hospital') {
@@ -794,27 +1095,78 @@
                 await addDoctorStamp();
             }
         }
+        
+        // Find non-overlapping position for new stamp
+        function findNonOverlappingPosition(x, y) {
+            let newX = x, newY = y;
+            let attempts = 0;
+            const maxAttempts = 10;
+            
+            while (attempts < maxAttempts) {
+                let overlapping = false;
+                
+                // Check against existing stamps
+                for (let pos of lastStampPositions) {
+                    const distance = Math.sqrt(Math.pow(newX - pos.x, 2) + Math.pow(newY - pos.y, 2));
+                    if (distance < STAMP_SIZE) {
+                        overlapping = true;
+                        break;
+                    }
+                }
+                
+                if (!overlapping) {
+                    break;
+                }
+                
+                // Try new position with offset
+                newX = x + (Math.random() - 0.5) * 0.3;
+                newY = y + (Math.random() - 0.5) * 0.3;
+                
+                // Keep within bounds - allow full document area
+                newX = Math.max(0.05, Math.min(0.95, newX));
+                newY = Math.max(0.05, Math.min(0.95, newY));
+                
+                attempts++;
+            }
+            
+            return { x: newX, y: newY };
+        }
 
         // Show stamp form
         function showStampForm(type) {
             hideStampForms();
-            document.getElementById(type + 'StampForm').style.display = 'block';
-            activeStampType = type;
-            
-            // Change cursor to indicate stamp placement mode
-            document.getElementById('previewImage').style.cursor = 'crosshair';
-            
-            showInfo(`Click anywhere on the document to place the ${type} stamp`);
+            const formElement = document.getElementById(type + 'StampForm');
+            if (formElement) {
+                formElement.style.display = 'block';
+                activeStampType = type;
+                
+                // Change cursor and add visual feedback
+                const previewImage = document.getElementById('previewImage');
+                previewImage.style.cursor = 'crosshair';
+                previewImage.style.borderColor = '#0066ff';
+                previewImage.style.borderWidth = '3px';
+                
+                showInfo(`✨ Click anywhere on the document to place the ${type} stamp`);
+            } else {
+                console.error(`Stamp form not found: ${type}StampForm`);
+            }
         }
 
         // Hide stamp forms
         function hideStampForms() {
-            document.getElementById('hospitalStampForm').style.display = 'none';
-            document.getElementById('doctorStampForm').style.display = 'none';
+            const hospitalForm = document.getElementById('hospitalStampForm');
+            const doctorForm = document.getElementById('doctorStampForm');
+            
+            if (hospitalForm) hospitalForm.style.display = 'none';
+            if (doctorForm) doctorForm.style.display = 'none';
+            
             activeStampType = null;
             
-            // Reset cursor
-            document.getElementById('previewImage').style.cursor = 'default';
+            // Reset cursor and visual feedback
+            const previewImage = document.getElementById('previewImage');
+            previewImage.style.cursor = 'default';
+            previewImage.style.borderColor = '#e9ecef';
+            previewImage.style.borderWidth = '2px';
             
             hideAlerts();
         }
@@ -836,7 +1188,7 @@
             showLoading(true);
 
             try {
-                const response = await fetch('/api/v1/document-stamper/stamp/add', {
+                const response = await fetch('/api/document-stamper/stamp/add', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -846,18 +1198,28 @@
                         page_number: currentPageNumber,
                         stamp_type: 'hospital',
                         hospital_name: hospitalName,
-                        x: stampClickPosition.x,
-                        y: stampClickPosition.y
+                        x: selectedPositions.hospital ? selectedPositions.hospital.x : (Math.random() * 0.8 + 0.1),
+                        y: selectedPositions.hospital ? selectedPositions.hospital.y : (Math.random() * 0.8 + 0.1)
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    showSuccess('Hospital stamp added successfully!');
+                    showSuccess('Hospital stamp added successfully! You can drag and resize it anywhere on the document.');
                     document.getElementById('hospitalName').value = '';
+                    
+                    // Reset position selection
+                    selectedPositions.hospital = null;
+                    document.querySelectorAll("button[onclick*=\"setStampPosition('hospital']").forEach(btn => {
+                        btn.style.background = '';
+                        btn.style.color = '';
+                    });
+                    
                     hideStampForms();
-                    refreshPreview();
+                    
+                    // Update stamps list to show new stamp overlay
+                    updateStampsList();
                 } else {
                     showError('Failed to add hospital stamp: ' + (data.detail || 'Unknown error'));
                 }
@@ -888,7 +1250,7 @@
             showLoading(true);
 
             try {
-                const response = await fetch('/api/v1/document-stamper/stamp/add', {
+                const response = await fetch('/api/document-stamper/stamp/add', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -900,18 +1262,25 @@
                         doctor_name: doctorName,
                         degree: doctorDegree,
                         registration_number: doctorReg,
-                        x: stampClickPosition.x,
-                        y: stampClickPosition.y
+                        x: selectedPositions.doctor ? selectedPositions.doctor.x : (Math.random() * 0.8 + 0.1),
+                        y: selectedPositions.doctor ? selectedPositions.doctor.y : (Math.random() * 0.8 + 0.1)
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    showSuccess('Doctor stamp added successfully!');
+                    showSuccess('Doctor stamp added successfully! You can drag and resize it anywhere on the document.');
                     document.getElementById('doctorName').value = '';
                     document.getElementById('doctorDegree').value = '';
                     document.getElementById('doctorReg').value = '';
+                    
+                    // Reset position selection
+                    selectedPositions.doctor = null;
+                    document.querySelectorAll("button[onclick*=\"setStampPosition('doctor']").forEach(btn => {
+                        btn.style.background = '';
+                        btn.style.color = '';
+                    });
                     hideStampForms();
                     refreshPreview();
                 } else {
@@ -923,11 +1292,6 @@
             } finally {
                 showLoading(false);
             }
-        }
-
-        // Refresh preview
-        function refreshPreview() {
-            loadPagePreview(currentPageNumber);
         }
 
         // Toggle stamp boundaries
@@ -943,7 +1307,7 @@
             if (!sessionId) return;
 
             try {
-                const response = await fetch(`/api/v1/document-stamper/stamps/${sessionId}/clear`, {
+                const response = await fetch(`/api/document-stamper/stamps/${sessionId}/clear`, {
                     method: 'DELETE'
                 });
 
@@ -951,7 +1315,8 @@
 
                 if (data.success) {
                     showSuccess(data.message);
-                    refreshPreview();
+                    lastStampPositions = []; // Clear tracked positions
+                    await refreshPreview();
                 } else {
                     showError('Failed to clear stamps');
                 }
@@ -961,20 +1326,340 @@
             }
         }
 
+        // Refresh preview with current stamps
+        async function refreshPreview() {
+            if (!sessionId || !documentData) {
+                console.log('Cannot refresh preview: missing session or document data');
+                return;
+            }
+            
+            console.log('Refreshing preview...');
+            await loadPagePreview(currentPageNumber);
+        }
+        
+        // Create draggable stamp overlay
+        function createStampOverlay(stamp, previewContainer) {
+            console.log('Creating stamp overlay for:', stamp.stamp_id, 'at position:', stamp.x, stamp.y); // Debug log
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'stamp-overlay';
+            overlay.id = `stamp-${stamp.stamp_id}`;
+            overlay.setAttribute('data-stamp-id', stamp.stamp_id);
+            
+            // Use container dimensions for positioning
+            const containerWidth = previewContainer.offsetWidth || 800;
+            const containerHeight = previewContainer.offsetHeight || 600;
+            
+            // Calculate position relative to container
+            const stampX = stamp.x * containerWidth;
+            const stampY = stamp.y * containerHeight;
+            
+            overlay.style.position = 'absolute';
+            overlay.style.left = stampX + 'px';
+            overlay.style.top = stampY + 'px';
+            overlay.style.width = (stamp.width || 120) + 'px';
+            overlay.style.height = (stamp.height || 80) + 'px';
+            overlay.style.cursor = 'move';
+            overlay.style.zIndex = '100';
+            
+            console.log('Stamp positioned at:', stampX, stampY, 'in container:', containerWidth, 'x', containerHeight); // Debug log
+            
+            // Create stamp content
+            const content = document.createElement('div');
+            content.className = 'stamp-content';
+            
+            if (stamp.stamp_type === 'hospital') {
+                content.innerHTML = `🏥<br>${stamp.text || 'Hospital'}`;
+            } else if (stamp.stamp_type === 'doctor') {
+                content.innerHTML = `🩺<br>${stamp.text || 'Doctor'}`;
+            }
+            
+            // Create toolbar
+            const toolbar = document.createElement('div');
+            toolbar.className = 'stamp-toolbar';
+            toolbar.innerHTML = `
+                <button onclick="deleteStamp('${stamp.stamp_id}')" title="Delete">🗑️</button>
+                <button onclick="duplicateStamp('${stamp.stamp_id}')" title="Duplicate">📋</button>
+                <span style="font-size: 10px; color: #ccc;">${stamp.stamp_type}</span>
+            `;
+            
+            // Create resize handles
+            const handles = ['nw', 'ne', 'sw', 'se'];
+            handles.forEach(handle => {
+                const handleElement = document.createElement('div');
+                handleElement.className = `resize-handle ${handle}`;
+                handleElement.addEventListener('mousedown', (e) => startResize(e, overlay, handle));
+                overlay.appendChild(handleElement);
+            });
+            
+            overlay.appendChild(content);
+            overlay.appendChild(toolbar);
+            
+            // Add drag functionality
+            overlay.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('resize-handle')) return;
+                startDrag(e, overlay);
+            });
+            
+            previewContainer.appendChild(overlay);
+            stampElements.set(stamp.stamp_id, overlay);
+            
+            return overlay;
+        }
+        
+        // Start dragging
+        function startDrag(e, stampElement) {
+            if (e.target.tagName === 'BUTTON') return; // Don't drag when clicking toolbar buttons
+            
+            isDragging = true;
+            dragStamp = stampElement;
+            dragStartX = e.clientX - stampElement.offsetLeft;
+            dragStartY = e.clientY - stampElement.offsetTop;
+            
+            stampElement.classList.add('dragging');
+            stampElement.classList.add('selected');
+            
+            // Clear other selections
+            document.querySelectorAll('.stamp-overlay').forEach(el => {
+                if (el !== stampElement) {
+                    el.classList.remove('selected');
+                }
+            });
+            
+            e.preventDefault();
+        }
+        
+        // Start resizing
+        function startResize(e, stampElement, handle) {
+            isResizing = true;
+            dragStamp = stampElement;
+            resizeHandle = handle;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            
+            stampElement.classList.add('selected');
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        // Handle mouse move for drag and resize
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && dragStamp) {
+                const newX = e.clientX - dragStartX;
+                const newY = e.clientY - dragStartY;
+                
+                // Keep within preview bounds
+                const previewContainer = document.getElementById('previewContainer');
+                const containerRect = previewContainer.getBoundingClientRect();
+                const stampRect = dragStamp.getBoundingClientRect();
+                
+                const maxX = containerRect.width - stampRect.width;
+                const maxY = containerRect.height - stampRect.height;
+                
+                dragStamp.style.left = Math.max(0, Math.min(maxX, newX)) + 'px';
+                dragStamp.style.top = Math.max(0, Math.min(maxY, newY)) + 'px';
+            }
+            
+            if (isResizing && dragStamp && resizeHandle) {
+                const rect = dragStamp.getBoundingClientRect();
+                const deltaX = e.clientX - dragStartX;
+                const deltaY = e.clientY - dragStartY;
+                
+                let newWidth = parseInt(dragStamp.style.width);
+                let newHeight = parseInt(dragStamp.style.height);
+                let newLeft = parseInt(dragStamp.style.left);
+                let newTop = parseInt(dragStamp.style.top);
+                
+                switch (resizeHandle) {
+                    case 'se': // Bottom-right
+                        newWidth += deltaX;
+                        newHeight += deltaY;
+                        break;
+                    case 'sw': // Bottom-left
+                        newWidth -= deltaX;
+                        newHeight += deltaY;
+                        newLeft += deltaX;
+                        break;
+                    case 'ne': // Top-right
+                        newWidth += deltaX;
+                        newHeight -= deltaY;
+                        newTop += deltaY;
+                        break;
+                    case 'nw': // Top-left
+                        newWidth -= deltaX;
+                        newHeight -= deltaY;
+                        newLeft += deltaX;
+                        newTop += deltaY;
+                        break;
+                }
+                
+                // Enforce minimum size
+                newWidth = Math.max(80, newWidth);
+                newHeight = Math.max(60, newHeight);
+                
+                dragStamp.style.width = newWidth + 'px';
+                dragStamp.style.height = newHeight + 'px';
+                dragStamp.style.left = newLeft + 'px';
+                dragStamp.style.top = newTop + 'px';
+                
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+            }
+        });
+        
+        // Handle mouse up
+        document.addEventListener('mouseup', async (e) => {
+            if (isDragging && dragStamp) {
+                dragStamp.classList.remove('dragging');
+                
+                // Update stamp position on server
+                await updateStampPosition(dragStamp);
+                
+                isDragging = false;
+                dragStamp = null;
+            }
+            
+            if (isResizing && dragStamp) {
+                // Update stamp size on server
+                await updateStampSize(dragStamp);
+                
+                isResizing = false;
+                dragStamp = null;
+                resizeHandle = null;
+            }
+        });
+        
+        // Update stamp position on server
+        async function updateStampPosition(stampElement) {
+            const stampId = stampElement.getAttribute('data-stamp-id');
+            const previewImage = document.getElementById('previewImage');
+            const imageRect = previewImage.getBoundingClientRect();
+            const stampRect = stampElement.getBoundingClientRect();
+            
+            // Calculate normalized position
+            const x = (stampRect.left - imageRect.left) / imageRect.width;
+            const y = (stampRect.top - imageRect.top) / imageRect.height;
+            
+            try {
+                const response = await fetch('/api/document-stamper/stamp/move', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        stamp_id: stampId,
+                        x: Math.max(0, Math.min(1, x)),
+                        y: Math.max(0, Math.min(1, y))
+                    })
+                });
+                
+                if (!response.ok) {
+                    console.error('Failed to update stamp position');
+                }
+            } catch (error) {
+                console.error('Error updating stamp position:', error);
+            }
+        }
+        
+        // Update stamp size on server
+        async function updateStampSize(stampElement) {
+            const stampId = stampElement.getAttribute('data-stamp-id');
+            const width = parseInt(stampElement.style.width);
+            const height = parseInt(stampElement.style.height);
+            
+            try {
+                const response = await fetch('/api/document-stamper/stamp/resize', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        stamp_id: stampId,
+                        width: width,
+                        height: height
+                    })
+                });
+                
+                if (!response.ok) {
+                    console.error('Failed to update stamp size');
+                }
+            } catch (error) {
+                console.error('Error updating stamp size:', error);
+            }
+        }
+        
+        // Delete stamp
+        async function deleteStamp(stampId) {
+            if (!confirm('Delete this stamp?')) return;
+            
+            try {
+                const response = await fetch(`/api/document-stamper/stamp/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        stamp_id: stampId
+                    })
+                });
+                
+                if (response.ok) {
+                    const stampElement = stampElements.get(stampId);
+                    if (stampElement) {
+                        stampElement.remove();
+                        stampElements.delete(stampId);
+                    }
+                    showSuccess('Stamp deleted successfully!');
+                    updateStampsList();
+                } else {
+                    showError('Failed to delete stamp');
+                }
+            } catch (error) {
+                console.error('Error deleting stamp:', error);
+                showError('Failed to delete stamp');
+            }
+        }
+        
+        // Duplicate stamp
+        async function duplicateStamp(stampId) {
+            // Implementation for duplicating stamps
+            showInfo('Duplicate feature coming soon!');
+        }
+        
         // Update stamps list
         async function updateStampsList() {
             if (!sessionId) return;
 
             try {
-                const response = await fetch(`/api/v1/document-stamper/stamps/${sessionId}/list?page_number=${currentPageNumber}`);
+                const response = await fetch(`/api/document-stamper/stamps/${sessionId}/list?page_number=${currentPageNumber}`);
                 const data = await response.json();
 
                 if (data.success) {
+                    console.log('Updating stamps list:', data.stamps); // Debug log
                     const stampsList = document.getElementById('stampsList');
+                    
+                    // Clear existing stamp overlays
+                    document.querySelectorAll('.stamp-overlay').forEach(el => el.remove());
+                    stampElements.clear();
                     
                     if (data.stamps.length === 0) {
                         stampsList.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No stamps on this page</p>';
                     } else {
+                        // Create stamp overlays
+                        const previewContainer = document.getElementById('previewContainer');
+                        const previewImage = document.getElementById('previewImage');
+                        
+                        console.log('Creating stamp overlays for', data.stamps.length, 'stamps'); // Debug log
+                        
+                        // Create overlays - remove the condition that prevents creation
+                        data.stamps.forEach(stamp => {
+                            console.log('Creating overlay for stamp:', stamp.stamp_id); // Debug log
+                            createStampOverlay(stamp, previewContainer);
+                        });
+                        
                         stampsList.innerHTML = data.stamps.map(stamp => `
                             <div class="stamp-item">
                                 <div class="stamp-info">
@@ -1001,7 +1686,7 @@
             if (!confirm('Are you sure you want to delete this stamp?')) return;
 
             try {
-                const response = await fetch('/api/v1/document-stamper/stamp/delete', {
+                const response = await fetch('/api/document-stamper/stamp/delete', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1031,7 +1716,7 @@
             if (!sessionId) return;
 
             try {
-                const response = await fetch(`/api/v1/document-stamper/stamps/${sessionId}/list`);
+                const response = await fetch(`/api/document-stamper/stamps/${sessionId}/list`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -1073,8 +1758,48 @@
         }
 
         // Download stamped document
-        function downloadStampedDocument() {
-            showInfo('Download functionality will be implemented in the next update');
+        async function downloadStampedDocument() {
+            if (!sessionId) {
+                showError('No document session available');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`/api/document-stamper/document/${sessionId}/download`, {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    
+                    // Generate filename with timestamp
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-');
+                    const filename = documentData?.metadata?.filename || 'document';
+                    const baseName = filename.replace(/\.[^/.]+$/, '');
+                    const extension = filename.includes('.') ? filename.split('.').pop() : 'pdf';
+                    
+                    a.download = `${baseName}_stamped_${timestamp}.${extension}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showSuccess('Document downloaded successfully!');
+                } else {
+                    const errorData = await response.json();
+                    showError('Download failed: ' + (errorData.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Download error:', error);
+                showError('Download failed: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
         }
 
         // Export stamp configuration
@@ -1082,7 +1807,7 @@
             if (!sessionId) return;
 
             try {
-                const response = await fetch(`/api/v1/document-stamper/stamps/${sessionId}/export`);
+                const response = await fetch(`/api/document-stamper/stamps/${sessionId}/export`);
                 
                 if (response.ok) {
                     const blob = await response.blob();
@@ -1116,6 +1841,21 @@
             alert.textContent = message;
             alert.style.display = 'block';
             setTimeout(() => alert.style.display = 'none', 5000);
+        }
+
+        // Set stamp position preset
+        function setStampPosition(stampType, x, y) {
+            selectedPositions[stampType] = { x, y };
+            
+            // Visual feedback - highlight selected button
+            const buttons = document.querySelectorAll(`button[onclick*="setStampPosition('${stampType}']`);
+            buttons.forEach(btn => btn.style.background = '');
+            
+            // Highlight the clicked button
+            event.target.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            event.target.style.color = 'white';
+            
+            console.log(`${stampType} stamp position set to:`, x, y);
         }
 
         function showError(message) {

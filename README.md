@@ -1,24 +1,34 @@
-# 🏥 Healthcare Stamp Generator
+# 🏥 Healthcare Stamp Generator & Document Stamping Platform
 
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-green.svg)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-2.0.0-green.svg)](https://fastapi.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/SudhirRaut-QA/healthcare-stamp-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/SudhirRaut-QA/healthcare-stamp-generator/actions)
 
-**A comprehensive healthcare stamp generation system with dual stamp support and complete Odoo ERP integration**
+**A comprehensive healthcare stamp generation and interactive document stamping platform with professional UI, drag & drop functionality, and precise positioning**
 
 ## 🎯 Overview
 
-This project provides a complete healthcare stamp generation solution featuring:
+This project provides a complete healthcare stamp generation and document stamping solution featuring:
 - **🏥 Hospital Stamps** - Circular design with dynamic spacing and dual padding system
 - **🩺 Doctor Stamps** - Rectangular layout with auto-prefix registration numbers  
+- **📄 Interactive Document Stamping** - Web interface with drag & drop, positioning, and real-time preview
 - **⚡ FastAPI Backend** - High-performance REST API with comprehensive validation
 - **🔧 Odoo ERP Integration** - Complete module for healthcare management systems
-- **📱 Multiple Interfaces** - CLI tools, interactive generators, and web API
+- **📱 Multiple Interfaces** - CLI tools, interactive generators, web interface, and API
 
 ## 🌟 Key Features
 
-### � **Hospital Stamps**
+### 📄 **Interactive Document Stamping Platform** ⭐ NEW!
+- **🎯 Auto-Placement & Manual Positioning** - Stamps auto-place with quick position buttons (Top, Bottom, Corners)
+- **🖱️ Professional Drag & Drop** - Move and resize stamps anywhere on documents with visual feedback
+- **📑 Multi-Document Support** - PDF and image upload with multi-page navigation
+- **👁️ Real-time Preview** - Live document preview with stamp overlays and positioning
+- **💾 Professional Download** - Generate and download stamped PDFs with all positioning preserved
+- **🎨 Modern UI** - Professional gradient buttons, hover effects, and responsive design
+- **🔄 Session Management** - Persistent sessions with stamp configuration and positioning
+
+### 🏥 **Hospital Stamps**
 - **Dynamic Circle Filling** - Intelligent spacing that fills the entire circular area
 - **Dual Padding System** - 3% inner + 3% outer boundary control for perfect fit
 - **Font Hierarchy** - Hospital name (largest), PAID (medium), CASH/Online (smallest)
@@ -33,10 +43,12 @@ This project provides a complete healthcare stamp generation solution featuring:
 - **Flexible Sizing** - 200x100 to 800x400 pixels with proportional scaling
 
 ### 🚀 **Advanced Technology**
-- **Dynamic Precision System** - Prevents text overlap and boundary violations
+- **PyMuPDF Integration** - Superior PDF processing without external dependencies
+- **Professional Visual Feedback** - Blue stamp overlays with resize handles and hover effects
+- **Smart Positioning System** - Quick placement buttons with expanded coverage (10%-90%)
 - **Memory Efficient Processing** - Optimized image generation with caching
 - **Comprehensive Validation** - Input validation with detailed error messages
-- **Multi-Interface Support** - CLI, API, interactive, and ERP integration
+- **Multi-Interface Support** - Web UI, CLI, API, interactive, and ERP integration
 
 ## 🚀 Quick Start Guide
 
@@ -61,10 +73,35 @@ python -m venv .venv
 # On macOS/Linux:
 source .venv/bin/activate
 
+# 4. Install dependencies
+pip install -r requirements.txt
 ```
 
-### 🎯 Step 2: Quick Test (Verify Installation)
+### 🎯 Step 2: Start the Application
 
+```bash
+# Start the FastAPI server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 🌐 Step 3: Access the Platform
+
+- **📄 Document Stamping Interface**: http://localhost:8000/static/document_stamper.html
+- **🏠 Main Application**: http://localhost:8000
+- **📚 API Documentation**: http://localhost:8000/docs
+- **📖 ReDoc**: http://localhost:8000/redoc
+
+### ⚡ Step 4: Quick Test
+
+**Document Stamping (Web Interface):**
+1. Open http://localhost:8000/static/document_stamper.html
+2. Upload a PDF or image document
+3. Fill in hospital or doctor details
+4. Use quick position buttons (↙ Bottom, ↓ Bottom Center, ↘ Bottom Right)
+5. Add stamps and drag them to desired positions
+6. Download the stamped document
+
+**Command Line Testing:**
 ```bash
 # Test hospital stamp generation
 python generate_stamp.py "Test Hospital"
@@ -77,7 +114,188 @@ ls stampOutput/        # Hospital stamps
 ls doctorStampOutput/  # Doctor stamps
 ```
 
+## ⚙️ Installation & Dependencies
+
+### 📦 Core Dependencies
+
+The platform uses modern Python libraries for optimal performance:
+
+```text
+# Web Framework & API
+fastapi==2.0.0           # Modern web framework for APIs
+uvicorn[standard]==0.25.0 # ASGI server for production
+
+# Image & Document Processing  
+Pillow==10.1.0           # Advanced image processing
+PyMuPDF==1.26.4          # Professional PDF processing (pure Python)
+
+# Development & Testing
+pytest==7.4.3           # Testing framework
+```
+
+### 🔧 Installation Methods
+
+**Method 1: Using pip (Recommended)**
+```bash
+# Install all dependencies
+pip install -r requirements.txt
+
+# Or install individually
+pip install fastapi uvicorn pillow pymupdf pytest
+```
+
+**Method 2: Using conda**
+```bash
+# Create conda environment
+conda create -n healthcare-stamps python=3.8+
+conda activate healthcare-stamps
+
+# Install dependencies
+conda install pillow
+pip install fastapi uvicorn pymupdf pytest
+```
+
+### 🏥 Platform Features Verification
+
+After installation, verify all features work:
+
+```bash
+# 1. Start the application
+uvicorn app.main:app --reload
+
+# 2. Test endpoints
+curl http://localhost:8000/health
+curl http://localhost:8000/docs
+
+# 3. Test document stamping interface
+# Visit: http://localhost:8000/static/document_stamper.html
+```
+
+### 🔍 Troubleshooting Installation
+
+**Common Issues:**
+
+1. **PyMuPDF Installation Error:**
+   ```bash
+   # Solution: Update pip first
+   pip install --upgrade pip
+   pip install PyMuPDF
+   ```
+
+2. **Pillow Installation Issues:**
+   ```bash
+   # Solution: Install via conda
+   conda install pillow
+   ```
+
+3. **FastAPI Import Error:**
+   ```bash
+   # Solution: Check Python version
+   python --version  # Should be 3.8+
+   pip install --upgrade fastapi
+   ```
+
 ## 📖 Comprehensive Usage Guide
+
+### 📄 Interactive Document Stamping Platform ⭐ NEW!
+
+The document stamping platform provides a professional web interface for applying stamps to PDFs and images.
+
+#### **🌐 Web Interface Features**
+
+**Access:** http://localhost:8000/static/document_stamper.html
+
+**Key Capabilities:**
+- **📤 Multi-format Upload** - PDF, PNG, JPG, JPEG support
+- **🎯 Auto-placement with Quick Buttons** - Bottom Left, Bottom Center, Bottom Right
+- **👆 Drag & Drop Positioning** - Precise manual positioning
+- **📏 Resizable Stamps** - Dynamic size adjustment
+- **👁️ Real-time Preview** - Instant visual feedback
+- **💾 Professional Download** - High-quality output
+
+#### **🚀 Quick Usage Workflow**
+
+```
+1. 📤 Upload Document → 2. 📝 Fill Details → 3. 🎯 Position → 4. 💾 Download
+```
+
+**Step-by-Step Process:**
+
+1. **Upload Document:**
+   ```
+   Click "Choose file" or drag & drop PDF/image
+   Supported formats: PDF, PNG, JPG, JPEG
+   ```
+
+2. **Add Hospital Stamp:**
+   ```
+   📝 Hospital Name: "City General Hospital"
+   📝 Address: "123 Medical St, Health City"
+   🎯 Click: ↙ Bottom Left (auto-placement)
+   ✅ Add Hospital Stamp
+   ```
+
+3. **Add Doctor Stamp:**
+   ```
+   📝 Doctor Name: "Dr. Sarah Johnson"
+   📝 Specialization: "MBBS, MD"
+   📝 Registration: "MCI-45678"
+   🎯 Click: ↘ Bottom Right (auto-placement)
+   ✅ Add Doctor Stamp
+   ```
+
+4. **Fine-tune Position:**
+   ```
+   👆 Drag stamps to exact position
+   📏 Resize using corner handles
+   👁️ Preview updates in real-time
+   ```
+
+5. **Download Result:**
+   ```
+   💾 Click "Download Stamped Document"
+   📁 File saves as: original_name_stamped.pdf
+   ```
+
+#### **🎯 Quick Position Buttons**
+
+The platform includes professional quick positioning:
+
+```
+Position Options:
+↙ Bottom Left    - 10% from left, 10% from bottom
+↓ Bottom Center  - 50% centered, 10% from bottom  
+↘ Bottom Right   - 90% from right, 10% from bottom
+```
+
+**Custom Positioning:**
+- **Range:** 10% to 90% (horizontal and vertical)
+- **Method:** Drag & drop for pixel-perfect placement
+- **Visual:** Real-time position indicators
+
+#### **🔧 API Integration**
+
+For programmatic access, use the REST API:
+
+```bash
+# 1. Upload document
+curl -X POST "http://localhost:8000/api/document-stamper/upload" \
+     -F "file=@document.pdf"
+
+# 2. Add hospital stamp  
+curl -X POST "http://localhost:8000/api/document-stamper/add-hospital-stamp" \
+     -H "Content-Type: application/json" \
+     -d '{"hospital_name": "City Hospital", "address": "123 St"}'
+
+# 3. Add doctor stamp
+curl -X POST "http://localhost:8000/api/document-stamper/add-doctor-stamp" \
+     -H "Content-Type: application/json" \
+     -d '{"doctor_name": "Dr. Smith", "specialization": "MBBS"}'
+
+# 4. Download result
+curl -X GET "http://localhost:8000/api/document-stamper/download" \
+     --output stamped_document.pdf
+```
 
 ### 🏥 Hospital Stamps (Circular Design)
 
@@ -147,21 +365,60 @@ python interactive_doctor_generator.py
 
 ### 🌐 Web API (FastAPI Integration)
 
-#### **Step 1: Start the Server**
-```bash
-# Development server
-uvicorn app.main:app --reload --port 8000
+#### **🚀 Document Stamping API Endpoints** ⭐ NEW!
 
-# Production server  
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+**Base URL:** `http://localhost:8000/api/document-stamper`
+
+**Complete Document Stamping Workflow:**
+
+```bash
+# 1. Upload Document (PDF/Image)
+curl -X POST "http://localhost:8000/api/document-stamper/upload" \
+     -F "file=@prescription.pdf"
+
+# 2. Add Hospital Stamp (with auto-positioning)  
+curl -X POST "http://localhost:8000/api/document-stamper/add-hospital-stamp" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "hospital_name": "City General Hospital",
+       "address": "123 Medical Street, Health City",
+       "position": "bottom-left"
+     }'
+
+# 3. Add Doctor Stamp (with precise positioning)
+curl -X POST "http://localhost:8000/api/document-stamper/add-doctor-stamp" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "doctor_name": "Dr. Sarah Johnson",
+       "specialization": "MBBS, MD (Cardiology)",
+       "registration_number": "MCI-12345",
+       "position": "bottom-right",
+       "x": 85,
+       "y": 15
+     }'
+
+# 4. Download Stamped Document
+curl -X GET "http://localhost:8000/api/document-stamper/download" \
+     --output stamped_prescription.pdf
 ```
 
-#### **Step 2: Access API Documentation**
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **OpenAPI JSON**: http://localhost:8000/openapi.json
+**📍 Position Options:**
+- **Auto-positions:** `"bottom-left"`, `"bottom-center"`, `"bottom-right"`  
+- **Custom coordinates:** `"x": 10-90`, `"y": 10-90` (percentage values)
 
-#### **Step 3: API Endpoints**
+**📋 Session Management:**
+```bash
+# Get current session status
+curl -X GET "http://localhost:8000/api/document-stamper/session/status"
+
+# Reset session (clear stamps)
+curl -X POST "http://localhost:8000/api/document-stamper/session/reset"
+
+# List all stamps in session
+curl -X GET "http://localhost:8000/api/document-stamper/stamps"
+```
+
+#### **🏥 Traditional Stamp Generation API**
 
 **Hospital Stamps:**
 ```bash
@@ -204,6 +461,24 @@ curl -X POST "http://localhost:8000/api/v1/doctor-stamp/generate/batch" \
   }'
 ```
 
+#### **📚 API Documentation Access**
+- **🌐 Interactive Swagger UI**: http://localhost:8000/docs
+- **📖 ReDoc Documentation**: http://localhost:8000/redoc  
+- **🔗 OpenAPI JSON Schema**: http://localhost:8000/openapi.json
+
+#### **🔧 Server Management**
+
+```bash
+# Development server (with auto-reload)
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Production server (multi-worker)  
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+# Health check endpoint
+curl http://localhost:8000/health
+```
+
 > 📖 **See [USAGE_EXAMPLES.md](USAGE_EXAMPLES.md) for hospital stamp examples**  
 > 📖 **See [DOCTOR_STAMP_GUIDE.md](DOCTOR_STAMP_GUIDE.md) for doctor stamp examples**
 
@@ -211,43 +486,204 @@ curl -X POST "http://localhost:8000/api/v1/doctor-stamp/generate/batch" \
 
 ### **Complete Healthcare Management System Integration**
 
-#### **Step 1: Install Odoo Module**
+This project includes a **ready-to-use Odoo module** for seamless ERP integration. The module provides native Odoo models, views, and workflows for hospital and doctor stamp generation within your healthcare management system.
+
+#### **📦 What's Included**
+- ✅ Complete Odoo module in `odoo_integration/` folder
+- ✅ Hospital stamp model with partner integration
+- ✅ Doctor stamp model with employee integration  
+- ✅ Professional XML views and menus
+- ✅ Security rules and access control
+- ✅ Adapter classes for core generator integration
+
+#### **⚡ Quick Installation (5 Steps)**
+
+**Step 1: Copy Module to Odoo**
 ```bash
-# Copy module to Odoo addons directory
+# Copy the odoo_integration folder to your Odoo addons directory
 cp -r odoo_integration /path/to/odoo/addons/healthcare_stamp
 
-# Install PIL/Pillow in Odoo environment
-pip install Pillow
-
-# In Odoo interface:
-# Apps → Update Apps List → Search "Healthcare Stamp Generator" → Install
+# Windows PowerShell:
+Copy-Item "odoo_integration" -Destination "C:\path\to\odoo\addons\healthcare_stamp" -Recurse
 ```
 
-#### **Step 2: Module Features**
+**Step 2: Update Path Configuration**
+```bash
+# Edit both adapter files to point to your project location:
+# odoo_integration/lib/hospital_generator.py (line 13)
+# odoo_integration/lib/doctor_generator.py (line 13)
+
+# Update the app_path variable with your project path:
+app_path = '/path/to/healthcare-stamp-generator/app'
+# Or on Windows:
+app_path = r'C:\path\to\healthcare-stamp-generator\app'
+```
+
+**Step 3: Install Dependencies**
+```bash
+# Ensure Pillow is available in Odoo's Python environment
+pip install Pillow
+
+# Or if using Odoo's virtual environment:
+source /path/to/odoo/venv/bin/activate
+pip install Pillow
+```
+
+**Step 4: Restart Odoo & Install Module**
+```bash
+# Restart Odoo service
+sudo systemctl restart odoo
+# Or on Windows: Restart-Service Odoo
+
+# Then in Odoo web interface:
+# 1. Login as administrator
+# 2. Navigate to Apps
+# 3. Click "Update Apps List"
+# 4. Search for "Healthcare Stamp Generator"
+# 5. Click "Activate" or "Install"
+```
+
+**Step 5: Test the Integration**
+```bash
+# In Odoo, navigate to:
+Healthcare → Hospital Stamps → Create
+# Enter hospital name: "Test Hospital"
+# Click "Generate Stamp"
+# Download the generated PNG
+```
+
+#### **🎯 Module Features**
 - **🏥 Hospital Stamps**: Integration with `res.partner` (companies)
+  - Create stamps linked to hospital partner records
+  - One-click generation with download
+  - Configurable size and styling
+  
 - **🩺 Doctor Stamps**: Integration with `hr.employee` (doctors)
+  - Auto-prefix registration numbers
+  - Link stamps to employee records
+  - Batch generation support
+  
 - **📋 Native UI**: Professional forms and list views
+  - Tree/list view for stamp management
+  - Form view with stamp preview
+  - Status tracking (draft/generated/archived)
+  
 - **🔐 Security**: Role-based access control
+  - User and manager access levels
+  - Model-level permissions
+  - Configurable access rules
+  
 - **📊 Reports**: Integrate stamps in medical documents
+  - Use stamps in QWeb reports
+  - PDF generation with stamps
+  - Prescription and invoice templates
+
 - **🌐 API**: RESTful endpoints for external systems
+  - XML-RPC API access
+  - External system integration
+  - Programmatic stamp generation
 
-#### **Step 3: Usage in Odoo**
+#### **📚 Detailed Documentation**
 
-**Hospital Stamps:**
+For complete integration guides, see:
+- **[odoo_integration/README.md](odoo_integration/README.md)** - Module overview and features
+- **[odoo_integration/INTEGRATION_GUIDE.md](odoo_integration/INTEGRATION_GUIDE.md)** - Detailed setup instructions
+- **[ODOO_QUICK_START.md](ODOO_QUICK_START.md)** - 15-minute quick start guide
+- **[ODOO_INTEGRATION_STEPS.md](ODOO_INTEGRATION_STEPS.md)** - Comprehensive step-by-step guide
+
+#### **🔧 Configuration**
+
+**Path Configuration (Important!):**
+
+Before installing the module, update the path to your core generator:
+
+```python
+# Edit: odoo_integration/lib/hospital_generator.py
+# Edit: odoo_integration/lib/doctor_generator.py
+
+# Update line 13 with your actual project location:
+app_path = '/path/to/your/healthcare-stamp-generator/app'
+
+# Examples:
+# Linux/Mac: app_path = '/opt/healthcare-stamp-generator/app'
+# Windows: app_path = r'C:\healthcare-stamp-generator\app'
+```
+
+**Odoo Configuration:**
+
+Add to your `odoo.conf` file:
+```ini
+[options]
+addons_path = /opt/odoo/addons,/path/to/custom/addons
+workers = 4  # For better stamp generation performance
+limit_memory_hard = 2684354560  # 2.5GB for image processing
+```
+
+#### **🚨 Troubleshooting**
+
+**Issue: Module not found**
+```bash
+# Solution: Check addons_path in odoo.conf
+# Restart Odoo service
+# Update Apps List in Odoo interface
+```
+
+**Issue: Import errors**
+```bash
+# Solution: Verify Pillow is installed
+pip install Pillow
+
+# Check path configuration in adapter files
+# Ensure app/ folder is accessible
+```
+
+**Issue: Permission denied**
+```bash
+# Solution: Fix folder permissions (Linux)
+sudo chown -R odoo:odoo /path/to/odoo/addons/healthcare_stamp
+sudo chmod -R 755 /path/to/odoo/addons/healthcare_stamp
+```
+
+#### **💡 Usage Examples**
+
+**Create Hospital Stamp in Odoo:**
 1. Navigate to **Healthcare → Hospital Stamps**
-2. Create new record with hospital information
-3. Optionally link to existing Partner record
-4. Click **Generate Stamp** button
-5. Download generated PNG file
+2. Click **Create**
+3. Enter hospital name and optional partner link
+4. Click **Generate Stamp**
+5. Download the PNG file
 
-**Doctor Stamps:**
+**Create Doctor Stamp in Odoo:**
 1. Navigate to **Healthcare → Doctor Stamps**
-2. Enter doctor details (auto-prefix for registration numbers)
-3. Optionally link to Employee record
-4. Configure dimensions if needed
-5. Click **Generate Stamp** and download
+2. Click **Create**
+3. Enter doctor details (name, degree, registration)
+4. Optionally link to employee record
+5. Click **Generate Stamp**
+6. Download or preview the stamp
 
-> 📖 **See [odoo_integration/README.md](odoo_integration/README.md) for complete Odoo integration guide**
+**Batch Generation:**
+```python
+# In Odoo Python code or external API
+stamps = self.env['healthcare.hospital.stamp'].create([
+    {'name': 'Hospital A', 'size': 300},
+    {'name': 'Hospital B', 'size': 350},
+])
+for stamp in stamps:
+    stamp.action_generate_stamp()
+```
+
+**Use in Reports:**
+```xml
+<!-- In QWeb report template -->
+<t t-if="doc.hospital_id.hospital_stamp_ids">
+    <img t-att-src="'data:image/png;base64,%s' % doc.hospital_id.hospital_stamp_ids[0].stamp_image"
+         style="width: 150px; height: 150px;"/>
+</t>
+```
+
+---
+
+> 📖 **For complete integration instructions, see [ODOO_QUICK_START.md](ODOO_QUICK_START.md)**
 
 ## 🎯 Advanced Features
 
@@ -293,17 +729,25 @@ healthcare-stamp-generator/
 │   ├── 🐍 main.py                   # FastAPI main application
 │   ├── 📁 api/                      # API endpoints
 │   │   ├── 🐍 stamp.py              # Hospital stamp routes
-│   │   └── 🐍 doctor_stamp_routes.py # Doctor stamp routes
+│   │   ├── 🐍 doctor_stamp_routes.py # Doctor stamp routes
+│   │   └── 🐍 document_stamper_routes.py # 📄 Document stamping API ⭐ NEW!
 │   ├── 📁 models/                   # Pydantic models
 │   │   └── 🐍 schemas.py            # Request/response schemas
 │   └── 📁 modules/                  # Core generators
 │       ├── 📁 stamp_generator/      # Hospital stamp generator
 │       │   └── 🐍 generator.py      # Core hospital stamp logic
-│       └── 📁 doctor_stamp/         # Doctor stamp generator
-│           └── 🐍 generator.py      # Core doctor stamp logic
+│       ├── 📁 doctor_stamp/         # Doctor stamp generator
+│       │   └── 🐍 generator.py      # Core doctor stamp logic
+│       └── 📁 document_stamper/     # 📄 Document stamping system ⭐ NEW!
+│           ├── � document_processor.py # PDF/Image processing with PyMuPDF
+│           ├── 🐍 stamp_overlay.py     # Stamp positioning & overlay logic
+│           └── 🐍 session_manager.py   # Session & state management
+├── �📁 static/                       # 🌐 Web interface ⭐ NEW!
+│   └── 📄 document_stamper.html     # Professional interactive UI
 ├── 📁 tests/                        # Test suite
 │   ├── 🐍 test_stamp_generator.py   # Hospital stamp tests
-│   └── 🐍 test_api.py               # API endpoint tests
+│   ├── 🐍 test_api.py               # API endpoint tests
+│   └── 🐍 test_document_stamper.py  # 📄 Document stamping tests ⭐ NEW!
 ├── 📁 odoo_integration/             # Complete Odoo ERP module
 │   ├── 📄 __manifest__.py           # Odoo module manifest
 │   ├── 📄 README.md                 # Odoo integration guide
@@ -323,6 +767,20 @@ healthcare-stamp-generator/
     └── 📁 workflows/
         └── 🗂️ ci.yml                 # GitHub Actions
 ```
+
+### 🌟 New Components Highlights
+
+**📄 Document Stamping System** ⭐ NEW!
+- **🔧 document_processor.py** - PyMuPDF integration for PDF/image processing
+- **🎯 stamp_overlay.py** - Professional stamp positioning with drag & drop
+- **🗂️ session_manager.py** - UUID-based session tracking and state management
+- **🌐 document_stamper.html** - Modern web interface with gradient buttons & real-time preview
+
+**🚀 Enhanced Capabilities:**
+- **Multi-format Support** - PDF, PNG, JPG, JPEG processing
+- **Professional UI** - Drag & drop, quick positioning, resizable stamps
+- **PyMuPDF Integration** - Pure Python PDF processing (no external dependencies)
+- **Bottom Positioning** - Enhanced range (10%-90%) for precise document stamping
 
 ## 🧪 Testing
 
@@ -815,3 +1273,83 @@ preview = requests.post("/api/v1/document-stamper/preview/page",
    - Download the stamped document
 
 **Start generating professional healthcare stamps and stamping documents today!** 🚀
+
+## 🤝 Contributing & Development
+
+### **📋 Contribution Guidelines**
+
+We welcome contributions to enhance the healthcare stamp generator platform!
+
+**How to Contribute:**
+
+1. **🍴 Fork the repository**
+2. **🌿 Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **💻 Make your changes** with proper documentation
+4. **✅ Add tests** for new functionality
+5. **🧪 Run test suite**: `pytest tests/`
+6. **📝 Commit changes**: `git commit -m 'Add amazing feature'`
+7. **📤 Push to branch**: `git push origin feature/amazing-feature`
+8. **🎯 Open a Pull Request**
+
+### **🛠️ Development Setup**
+
+```bash
+# 1. Clone and setup development environment
+git clone https://github.com/SudhirRaut-QA/healthcare-stamp-generator.git
+cd healthcare-stamp-generator
+
+# 2. Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+.venv\Scripts\activate     # Windows
+
+# 3. Install development dependencies
+pip install -r requirements.txt
+pip install pytest pytest-cov black flake8
+
+# 4. Run tests to verify setup
+pytest tests/ -v --cov=app
+```
+
+### **📈 Roadmap & Future Features**
+
+**🎯 Planned Enhancements:**
+- **📱 Mobile-responsive interface** for tablet/phone usage
+- **🔐 User authentication** and personal stamp libraries
+- **📊 Analytics dashboard** for stamp usage tracking
+- **🌐 Multi-language support** for international healthcare systems
+- **🎨 Custom stamp templates** and branding options
+- **📧 Email integration** for automatic document delivery
+- **☁️ Cloud storage** integration (AWS S3, Google Drive)
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **FastAPI Community** - For the excellent web framework
+- **PyMuPDF Team** - For reliable PDF processing capabilities  
+- **Python PIL/Pillow** - For powerful image processing
+- **Healthcare Professionals** - For feedback and real-world testing
+- **Open Source Community** - For inspiration and collaboration
+
+## 📞 Support & Contact
+
+- **🐛 Report Issues**: [GitHub Issues](https://github.com/SudhirRaut-QA/healthcare-stamp-generator/issues)
+- **💡 Feature Requests**: [GitHub Discussions](https://github.com/SudhirRaut-QA/healthcare-stamp-generator/discussions)
+- **📧 Email Support**: support@healthcare-stamps.com
+- **📚 Documentation**: [Wiki](https://github.com/SudhirRaut-QA/healthcare-stamp-generator/wiki)
+
+---
+
+### 🌟 **Ready to revolutionize your healthcare document workflow?** 
+
+⚡ **Get started in just 2 minutes with our interactive document stamping platform!** ⚡
+
+```bash
+git clone https://github.com/SudhirRaut-QA/healthcare-stamp-generator.git
+cd healthcare-stamp-generator && pip install -r requirements.txt
+uvicorn app.main:app --reload
+# Visit: http://localhost:8000/static/document_stamper.html
+```

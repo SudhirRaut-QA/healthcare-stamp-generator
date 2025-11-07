@@ -381,3 +381,73 @@ class StampOverlay:
             
         except (json.JSONDecodeError, ValueError, KeyError) as e:
             return False
+    
+    def apply_stamps_to_image(self, page_image: Image.Image, page_number: int) -> Image.Image:
+        """
+        Apply stamps to a page image and return the stamped image.
+        
+        Args:
+            page_image: PIL Image of the page
+            page_number: Page number to apply stamps for
+            
+        Returns:
+            PIL Image with stamps applied
+        """
+        # Get all stamps for this page
+        page_stamps = self.get_page_stamps(page_number)
+        
+        if not page_stamps:
+            return page_image.copy()
+        
+        # Create a copy of the page image to work on
+        stamped_image = page_image.copy()
+        
+        # Sort stamps by z_index for proper layering
+        sorted_stamps = sorted(page_stamps, key=lambda s: s.z_index)
+        
+        for stamp in sorted_stamps:
+            # Get the original stamp image
+            if stamp.stamp_id not in self.stamp_images:
+                continue  # Skip if stamp image not found
+            stamp_image = self.stamp_images[stamp.stamp_id].copy()
+            
+            # Apply rotation if needed
+            if stamp.rotation != 0:
+                stamp_image = stamp_image.rotate(-stamp.rotation, expand=True, resample=Image.LANCZOS)
+            
+            # Resize stamp if needed
+            if stamp.width and stamp.height:
+                stamp_image = stamp_image.resize((stamp.width, stamp.height), Image.LANCZOS)
+            
+            # Apply opacity
+            if stamp.opacity < 1.0:
+                # Create alpha channel if it doesn't exist
+                if stamp_image.mode != 'RGBA':
+                    stamp_image = stamp_image.convert('RGBA')
+                
+                # Apply opacity to alpha channel
+                alpha = stamp_image.split()[3]  # Get alpha channel
+                alpha = alpha.point(lambda p: int(p * stamp.opacity))
+                stamp_image.putalpha(alpha)
+            
+            # Calculate absolute position on the page
+            page_width, page_height = stamped_image.size
+            stamp_width, stamp_height = stamp_image.size
+            
+            # Convert relative coordinates to absolute
+            abs_x = int((stamp.x * page_width) - (stamp_width / 2))
+            abs_y = int((stamp.y * page_height) - (stamp_height / 2))
+            
+            # Ensure the stamp doesn't go outside page boundaries
+            abs_x = max(0, min(abs_x, page_width - stamp_width))
+            abs_y = max(0, min(abs_y, page_height - stamp_height))
+            
+            # Paste the stamp onto the page
+            if stamp_image.mode == 'RGBA':
+                # Use the alpha channel for transparency
+                stamped_image.paste(stamp_image, (abs_x, abs_y), stamp_image)
+            else:
+                # No alpha channel, paste directly
+                stamped_image.paste(stamp_image, (abs_x, abs_y))
+        
+        return stamped_image
