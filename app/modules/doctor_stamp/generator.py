@@ -22,7 +22,8 @@ class DoctorStampGenerator:
         self.default_width = 400
         self.default_height = 200
         self.background_color = (255, 255, 255, 0)  # Transparent
-        self.text_color = "#0066FF"  # Much brighter, vibrant blue
+        self.text_color = "#2F4F8F"  # Realistic ink blue - muted and authentic
+        self.border_color = "#2F4F8F"  # Matching border color
         self.padding = 20
         
     def _get_font_path(self, size: int, weight: str = "regular") -> ImageFont.FreeTypeFont:
@@ -133,11 +134,11 @@ class DoctorStampGenerator:
     
     def _draw_professional_border(self, draw: ImageDraw.Draw, width: int, height: int):
         """Draw professional double border around the stamp."""
-        # Outer border (thicker)
-        draw.rectangle([2, 2, width-3, height-3], outline=self.border_color, width=3)
+        # Outer border (thicker) - using the same realistic blue as text
+        draw.rectangle([2, 2, width-3, height-3], outline=self.text_color, width=3)
         
         # Inner border (thinner) 
-        draw.rectangle([8, 8, width-9, height-9], outline=self.border_color, width=1)
+        draw.rectangle([8, 8, width-9, height-9], outline=self.text_color, width=1)
     
     def generate_doctor_stamp(
         self,

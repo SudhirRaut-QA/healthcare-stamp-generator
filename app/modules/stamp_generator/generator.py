@@ -21,13 +21,13 @@ class StampStyle(Enum):
 
 
 class StampColor(Enum):
-    """Pre-defined stamp colors"""
-    BLUE = (0, 100, 200, 255)
-    RED = (200, 50, 50, 255)
-    GREEN = (50, 150, 50, 255)
-    BLACK = (0, 0, 0, 255)
-    NAVY = (25, 25, 112, 255)
-    MAROON = (128, 0, 0, 255)
+    """Pre-defined realistic ink stamp colors"""
+    BLUE = (47, 79, 143, 255)      # Realistic ink blue - muted and authentic
+    RED = (139, 69, 19, 255)       # Realistic ink red - deep brown-red
+    GREEN = (85, 107, 47, 255)     # Realistic ink green - dark olive green
+    BLACK = (32, 32, 32, 255)      # Realistic ink black - slightly softer than pure black
+    NAVY = (25, 42, 86, 255)       # Realistic navy - deeper and more muted
+    MAROON = (101, 67, 33, 255)    # Realistic maroon - earthy brown-red
 
 
 class HospitalStampGenerator:
@@ -88,18 +88,25 @@ class HospitalStampGenerator:
             inner_radius = min_inner_radius
             outer_radius = inner_radius + radius_gap
         
-        # Calculate text radius with dynamic padding from both inner and outer circles
-        # Add padding to ensure hospital name doesn't touch either boundary
-        inner_padding = max(6, int(size * 0.03))   # Padding from inner circle: 3% of size, min 6px
-        outer_padding = max(6, int(size * 0.03))   # Padding from outer circle: 3% of size, min 6px
+        # Calculate optimal text radius - increase for longer text to fit better
+        inner_padding = max(8, int(size * 0.04))   # Increased padding: 4% of size, min 8px
+        outer_padding = max(8, int(size * 0.04))   # Increased padding: 4% of size, min 8px
         
         # Calculate available space for text positioning after padding
         available_gap = outer_radius - inner_radius
         padded_inner_boundary = inner_radius + inner_padding
         padded_outer_boundary = outer_radius - outer_padding
         
-        # Position text radius in the center of the padded area
-        text_radius = (padded_inner_boundary + padded_outer_boundary) // 2
+        # For longer text, position closer to outer radius for more circumference
+        if text_length > 40:
+            # Long text: position at 75% towards outer boundary
+            text_radius = int(padded_inner_boundary + (available_gap * 0.75))
+        elif text_length > 25:
+            # Medium text: position at 65% towards outer boundary  
+            text_radius = int(padded_inner_boundary + (available_gap * 0.65))
+        else:
+            # Short text: position in center of available space
+            text_radius = (padded_inner_boundary + padded_outer_boundary) // 2
         
         # Ensure text radius is within safe boundaries
         if text_radius < padded_inner_boundary:
@@ -223,7 +230,8 @@ class HospitalStampGenerator:
         style: StampStyle = StampStyle.CLASSIC,
         include_date: bool = False,
         include_logo: bool = True,
-        border_style: str = "double"
+        border_style: str = "double",
+        character_spacing: float = 2.2  # Optimized: Character spacing multiplier for better readability without overlap
     ) -> bytes:
         """
         Generate a circular hospital stamp with enhanced features
@@ -237,6 +245,7 @@ class HospitalStampGenerator:
             include_date: Whether to include current date
             include_logo: Whether to include medical symbol
             border_style: Border style ("single", "double", "triple")
+            character_spacing: Character spacing multiplier (1.0=normal, 1.4=increased spacing)
             
         Returns:
             PNG image as bytes
@@ -267,10 +276,10 @@ class HospitalStampGenerator:
         # Prepare text for circular arrangement
         text_upper = hospital_name.upper()
         
-        # Draw text with dynamic precision positioning
+        # Draw text with dynamic precision positioning and enhanced character spacing
         text_radius = params['text_radius']  # Use calculated optimal radius
         self._draw_circular_text(
-            draw, text_upper, center, center, text_radius, font, color
+            draw, text_upper, center, center, text_radius, font, color, character_spacing
         )
         
         # Add center content with horizontal dividing line and PAID/Online-Offline text
@@ -296,9 +305,18 @@ class HospitalStampGenerator:
         center_y: int, 
         radius: int, 
         font: ImageFont.ImageFont, 
-        color: Tuple[int, int, int, int]
+        color: Tuple[int, int, int, int],
+        character_spacing_multiplier: float = 1.4  # Balanced default for good spacing
     ):
-        """Draw text along a circular path with characters in correct order"""
+        """Draw text along a circular path with characters in correct order and proper spacing"""
+        
+        # 🎛️ SIMPLE MANUAL CONTROLS 🎛️
+        # ================================================
+        # Change these values to adjust spacing:
+        BASE_COVERAGE_ANGLE = 330      # How much of circle to use
+        WORD_GAP_SIZE = 8              # Degrees between words
+        MIN_CHAR_SPACING = 4.0         # Minimum spacing between characters
+        # ================================================
         # Add filled dot symbol before hospital name
         medical_symbol = "●"  # Filled dot symbol
         full_text = f"{medical_symbol} {text}"  # Add symbol only at start
@@ -309,64 +327,44 @@ class HospitalStampGenerator:
         # Calculate word count for better spacing decisions
         word_count = len(full_text.split())
         
-        # DYNAMIC CIRCLE FILLING - Use full available space
-        # Always use maximum coverage with small gap for visual balance
-        coverage_angle = 350  # Use almost full circle (10° gap for balance)
+        # SIMPLE COVERAGE - Just use the base coverage
+        coverage_angle = BASE_COVERAGE_ANGLE
         
-        # For very short text, use slightly less to prevent over-spreading
-        if text_length <= 6:
-            coverage_angle = 320  # Don't over-spread very short text
-        elif text_length <= 12:
-            coverage_angle = 340  # Moderate coverage for short text
-        
-        # The text will now ALWAYS fill the available space dynamically
-        
-        # Calculate character spacing with word count adjustment
-        char_spacing = coverage_angle / text_length if text_length > 0 else 10
-        
-        # Adjust minimum spacing based on word count
-        if word_count > 5:
-            min_spacing = 6  # Tighter spacing for many words
-        elif word_count > 3:
-            min_spacing = 7  # Medium spacing
-        else:
-            min_spacing = 8  # Standard spacing
-        
-        # Ensure minimum spacing for readability
-        char_spacing = max(char_spacing, min_spacing)
-        
-        # Start angle (centered at top)
+        # Simple start angle
         start_angle = -90 - (coverage_angle / 2)
         
         # Split into words for realistic spacing
         words = full_text.split()
         
-        # TRULY DYNAMIC SPACING - Fill the entire available circle
-        
+        # SIMPLE SPACING CALCULATION
         # Calculate total characters (excluding spaces)
         total_chars = len(full_text.replace(' ', ''))
         
-        # Reserve space for word gaps (smaller, proportional gaps)
-        word_gap_ratio = 1.5  # Words are 1.5x character spacing apart
-        total_word_gaps = (len(words) - 1) * word_gap_ratio
+        # Calculate total space needed for word gaps
+        total_word_gaps = WORD_GAP_SIZE * (word_count - 1) if word_count > 1 else 0
         
-        # Calculate dynamic character spacing to fill the entire coverage angle
-        # This ensures NO empty space between end and start
-        effective_units = total_chars + total_word_gaps  # Total spacing units needed
-        realistic_char_spacing = coverage_angle / effective_units if effective_units > 0 else 10
+        # Remaining space for characters
+        char_space = coverage_angle - total_word_gaps
         
-        # Apply reasonable bounds (not too tight, not too loose)
-        min_spacing = 3.0  # Minimum for readability
-        max_spacing = 25.0  # Maximum to prevent over-spreading short text
-        realistic_char_spacing = max(min_spacing, min(realistic_char_spacing, max_spacing))
+        # Simple character spacing
+        if total_chars > 0:
+            base_char_spacing = char_space / total_chars
+        else:
+            base_char_spacing = MIN_CHAR_SPACING
         
-        # Draw each word with dynamic spacing
+        # Apply user's multiplier
+        realistic_char_spacing = base_char_spacing * character_spacing_multiplier
+        
+        # Ensure minimum spacing
+        realistic_char_spacing = max(MIN_CHAR_SPACING, realistic_char_spacing)
+        
+        # Draw each word with reduced spacing for justified appearance
         current_angle = start_angle
         
         for word_idx, word in enumerate(words):
-            # Add dynamic spacing between words (proportional to character spacing)
+            # Simple word spacing
             if word_idx > 0:
-                current_angle += realistic_char_spacing * word_gap_ratio
+                current_angle += WORD_GAP_SIZE
             
             # Draw characters in word with tight, realistic spacing
             for char_idx, char in enumerate(word):
@@ -418,19 +416,8 @@ class HospitalStampGenerator:
                 main_img = draw._image
                 main_img.paste(rotated_char, (paste_x, paste_y), mask)
                 
-                # Move to next character with dynamic readable spacing
-                if char == medical_symbol:
-                    current_angle += realistic_char_spacing * 1.5  # Proper space after dot
-                else:
-                    # Dynamic character spacing within words - readable but natural
-                    if char in 'ILil|1':  # Narrow characters
-                        spacing_multiplier = 0.8  # Slightly closer for narrow chars
-                    elif char in 'MW@':   # Wide characters  
-                        spacing_multiplier = 1.2  # More space for wide chars
-                    else:  # Normal characters
-                        spacing_multiplier = 1.0  # Standard readable spacing
-                    
-                    current_angle += realistic_char_spacing * spacing_multiplier
+                # Move to next character with consistent spacing
+                current_angle += realistic_char_spacing
     
     def save_stamp(self, hospital_name: str, filename: str, **kwargs) -> str:
         """
@@ -651,3 +638,46 @@ class HospitalStampGenerator:
         )
         
         return variants
+
+
+# Module-level convenience functions
+def generate_stamp(
+    hospital_name: str,
+    hospital_address: str = "",
+    stamp_date: str = "",
+    color: StampColor = StampColor.BLUE,
+    character_spacing: float = 1.2,
+    output_path: str = None,
+    **kwargs
+) -> str:
+    """
+    Generate a hospital stamp using the module-level convenience function
+    
+    Args:
+        hospital_name: Name of the hospital
+        hospital_address: Address of the hospital (optional)
+        stamp_date: Date to include in stamp (optional)
+        color: Stamp color from StampColor enum
+        character_spacing: Character spacing multiplier for text
+        output_path: Path to save the stamp image
+        **kwargs: Additional parameters for stamp generation
+    
+    Returns:
+        Path to the generated stamp image
+    """
+    generator = HospitalStampGenerator()
+    
+    # Prepare parameters
+    params = {
+        'color': color.value if isinstance(color, StampColor) else color,
+        'character_spacing': character_spacing,
+        **kwargs
+    }
+    
+    # Generate stamp
+    if output_path:
+        return generator.save_stamp_to_output(hospital_name, output_path, **params)
+    else:
+        # Generate in memory and save with default name
+        default_name = f"{hospital_name.replace(' ', '_')}_stamp.png"
+        return generator.save_stamp_to_output(hospital_name, default_name, **params)

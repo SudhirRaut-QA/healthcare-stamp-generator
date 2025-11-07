@@ -41,11 +41,12 @@ async def generate_stamp(request: StampGenerationRequest):
     try:
         logger.info(f"Generating stamp for hospital: {request.hospital_name}")
         
-        # Generate stamp using the enhanced method
+        # Generate stamp using the enhanced method with character spacing
         stamp_bytes = stamp_generator.generate_stamp(
             hospital_name=request.hospital_name,
             size=request.size,
-            font_size=request.font_size
+            font_size=request.font_size,
+            character_spacing=request.character_spacing
         )
         
         # Create filename
@@ -174,7 +175,7 @@ async def generate_enhanced_stamp(
         
         logger.info(f"Generating enhanced stamp for: {hospital_name} with style: {style}")
         
-        # Generate enhanced stamp
+        # Generate enhanced stamp with character spacing
         stamp_bytes = stamp_generator.generate_stamp(
             hospital_name=hospital_name,
             size=size,
@@ -182,7 +183,8 @@ async def generate_enhanced_stamp(
             color=stamp_color.value,
             include_date=include_date,
             include_logo=include_logo,
-            border_style=border_style
+            border_style=border_style,
+            character_spacing=1.2  # Optimized character spacing to prevent overlap
         )
         
         # Create filename

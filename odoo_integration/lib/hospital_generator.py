@@ -60,19 +60,19 @@ class HospitalStampAdapter:
         
         try:
             # Generate stamp using core generator
-            image = self.generator.generate_stamp(
+            # Note: The core generator returns PNG bytes directly, not a PIL Image
+            stamp_bytes = self.generator.generate_stamp(
                 hospital_name=hospital_name,
                 size=size,
                 **kwargs
             )
             
-            # Convert PIL image to base64 for Odoo storage
-            buffer = BytesIO()
-            image.save(buffer, format='PNG')
-            buffer.seek(0)
-            image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            
-            return True, image_base64, None
+            # The core generator returns bytes directly, convert to base64 for Odoo storage
+            if isinstance(stamp_bytes, bytes):
+                image_base64 = base64.b64encode(stamp_bytes).decode('utf-8')
+                return True, image_base64, None
+            else:
+                return False, None, "Generator returned invalid data type"
             
         except Exception as e:
             return False, None, str(e)

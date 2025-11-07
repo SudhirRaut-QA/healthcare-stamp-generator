@@ -91,7 +91,7 @@ async def generate_doctor_stamp(request: DoctorStampRequest):
     - Medical degree/qualification (medium font)
     - Registration number (smallest font)
     - Clean borderless layout
-    - Vibrant bright blue text (#0066FF) for maximum visibility
+    - Realistic ink blue text (#2F4F8F) for authentic printed appearance
     - Realistic medical fonts (Times New Roman priority)
     - Transparent PNG background
     
@@ -220,7 +220,7 @@ async def doctor_stamp_health_check():
         "features": [
             "Clean rectangular layout",
             "Three-tier text hierarchy",
-            "Vibrant bright blue text (#0066FF)",
+            "Realistic ink blue text (#2F4F8F) for authentic appearance",
             "Realistic medical fonts",
             "Enhanced visibility with shadows",
             "Borderless design",

@@ -64,22 +64,24 @@ class DoctorStampAdapter:
         
         try:
             # Generate stamp using core generator
-            image = self.generator.generate_stamp(
-                name=name,
+            # Note: The doctor stamp generator saves to file and returns the file path
+            output_path = self.generator.generate_doctor_stamp(
+                doctor_name=name,
                 degree=degree,
                 registration_number=registration_number,
                 width=width,
-                height=height,
+                height=200,
                 **kwargs
             )
             
-            # Convert PIL image to base64 for Odoo storage
-            buffer = BytesIO()
-            image.save(buffer, format='PNG')
-            buffer.seek(0)
-            image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            
-            return True, image_base64, None
+            # Read the generated file and convert to base64 for Odoo storage
+            if output_path and os.path.exists(output_path):
+                with open(output_path, 'rb') as f:
+                    stamp_bytes = f.read()
+                image_base64 = base64.b64encode(stamp_bytes).decode('utf-8')
+                return True, image_base64, None
+            else:
+                return False, None, "Generator failed to create stamp file"
             
         except Exception as e:
             return False, None, str(e)

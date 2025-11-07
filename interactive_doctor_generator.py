@@ -67,7 +67,7 @@ def display_features():
     print("   • Medical degree/qualification (medium font)")
     print("   • Registration number (smallest font)")
     print("   • Borderless design for clean appearance")
-    print("   • Vibrant bright blue text (#0066FF/#0080FF)")
+    print("   • Realistic ink blue text (#2F4F8F) for authentic appearance")
     print("   • Realistic medical fonts (Times New Roman priority)")
     print("   • Transparent PNG background")
     print("   • Scalable sizing with proportional fonts")

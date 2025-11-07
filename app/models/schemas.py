@@ -26,6 +26,12 @@ class StampGenerationRequest(BaseModel):
         ge=8,
         le=50
     )
+    character_spacing: Optional[float] = Field(
+        1.2,
+        description="Character spacing multiplier for optimal readability (1.0=normal, 1.2=improved spacing without overlap)",
+        ge=0.8,
+        le=2.5
+    )
 
 
 class EnhancedStampRequest(BaseModel):
@@ -61,6 +67,12 @@ class EnhancedStampRequest(BaseModel):
     border_style: Optional[str] = Field(
         "double",
         description="Border style: single, double, triple"
+    )
+    character_spacing: Optional[float] = Field(
+        1.2,
+        description="Character spacing multiplier for optimal readability (1.0=normal, 1.2=improved spacing without overlap)",
+        ge=0.8,
+        le=2.5
     )
 
 

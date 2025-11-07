@@ -95,7 +95,7 @@ The generated stamp will have:
         print("Features:")
         print("  - Clean rectangular layout")
         print("  - Three-tier text hierarchy")
-        print("  - Vibrant bright blue text (#0066FF)")
+        print("  - Realistic ink blue text (#2F4F8F) for authentic appearance")
         print("  - Enhanced visibility with realistic fonts")
         print("  - Borderless design")
         print("  - Transparent background")
